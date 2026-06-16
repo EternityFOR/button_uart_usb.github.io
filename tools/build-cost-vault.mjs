@@ -3,6 +3,8 @@ import { webcrypto } from "node:crypto";
 import path from "node:path";
 
 const DEFAULT_ITERATIONS = 210000;
+const PUBLIC_ID_PATTERN = /^product-[a-z0-9-]+$/;
+const PUBLIC_LABEL_PATTERN = /^Product [A-Z0-9]+$/;
 
 const sourcePath = process.argv[2] || ".private/products";
 const outputPath = process.argv[3] || "data/cost-vault.json";
@@ -22,11 +24,9 @@ const vault = {
   products: []
 };
 
-for (const product of products.sort((a, b) => String(a.label).localeCompare(String(b.label), "zh-CN"))) {
-  if (!product.id || !product.label || !product.accessCode || !product.data) {
-    throw new Error("Each product needs id, label, accessCode, and data.");
-  }
+const publicProducts = products.map(normalizeProduct).sort((a, b) => a.publicId.localeCompare(b.publicId, "en"));
 
+for (const product of publicProducts) {
   const salt = webcrypto.getRandomValues(new Uint8Array(16));
   const iv = webcrypto.getRandomValues(new Uint8Array(12));
   const key = await deriveKey(product.accessCode, salt, vault.kdf.iterations);
@@ -34,8 +34,8 @@ for (const product of products.sort((a, b) => String(a.label).localeCompare(Stri
   const ciphertext = new Uint8Array(await webcrypto.subtle.encrypt({ name: "AES-GCM", iv }, key, plaintext));
 
   vault.products.push({
-    id: product.id,
-    label: product.label,
+    id: product.publicId,
+    label: product.publicLabel,
     salt: toBase64(salt),
     iv: toBase64(iv),
     ciphertext: toBase64(ciphertext)
@@ -45,6 +45,21 @@ for (const product of products.sort((a, b) => String(a.label).localeCompare(Stri
 await mkdir(path.dirname(outputPath), { recursive: true });
 await writeFile(outputPath, `${JSON.stringify(vault, null, 2)}\n`, "utf8");
 console.log(`Wrote ${path.resolve(outputPath)} with ${vault.products.length} encrypted product(s).`);
+
+function normalizeProduct(product) {
+  const publicId = String(product.publicId || "").trim();
+  const publicLabel = String(product.publicLabel || "").trim();
+  if (!publicId || !publicLabel || !product.accessCode || !product.data) {
+    throw new Error("Each product needs publicId, publicLabel, accessCode, and data.");
+  }
+  if (!PUBLIC_ID_PATTERN.test(publicId)) {
+    throw new Error(`Public id must be generic, like product-a: ${publicId}`);
+  }
+  if (!PUBLIC_LABEL_PATTERN.test(publicLabel)) {
+    throw new Error(`Public label must be generic, like Product A: ${publicLabel}`);
+  }
+  return { publicId, publicLabel, accessCode: product.accessCode, data: product.data };
+}
 
 async function loadProducts(source) {
   const stat = await safeStat(source);
