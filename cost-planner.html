@@ -1,0 +1,2027 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>USB按钮输入转换器成本表</title>
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --panel: #fff;
+      --soft: #f8fafc;
+      --line: #d9e1ea;
+      --line-dark: #b6c2cf;
+      --text: #17212b;
+      --muted: #647384;
+      --accent: #155eef;
+      --accent-soft: #eaf1ff;
+      --danger: #c93127;
+      --good: #0f7a4f;
+      --shadow: 0 10px 26px rgba(23, 33, 43, .08);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 1120px;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    button {
+      min-height: 32px;
+      border: 1px solid var(--line-dark);
+      border-radius: 6px;
+      padding: 0 10px;
+      background: #fff;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    button.danger {
+      border-color: #efb3ad;
+      color: var(--danger);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      min-height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 5px 8px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    textarea {
+      min-height: 360px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+    }
+
+    input[type="checkbox"] {
+      width: 16px;
+      min-height: 16px;
+      padding: 0;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: start;
+      padding: 14px 22px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(245, 247, 250, .96);
+      backdrop-filter: blur(8px);
+    }
+
+    .title-row {
+      display: grid;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      white-space: nowrap;
+    }
+
+    .project-name {
+      max-width: none;
+    }
+
+    .product-switcher {
+      display: grid;
+      grid-template-columns: 72px minmax(180px, 300px) minmax(240px, 380px) repeat(3, auto);
+      gap: 8px;
+      align-items: center;
+      max-width: 980px;
+    }
+
+    .product-switcher label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .unlock-strip {
+      display: grid;
+      grid-template-columns: minmax(180px, 280px) minmax(180px, 280px) minmax(260px, 1fr) auto auto minmax(180px, 280px);
+      gap: 10px;
+      align-items: center;
+      padding: 12px 22px 0;
+    }
+
+    .unlock-title {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .unlock-title span,
+    .unlock-status {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 400;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(120px, 1fr));
+      gap: 10px;
+      padding: 14px 22px;
+    }
+
+    .stat {
+      min-height: 78px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .stat .label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .stat .value {
+      margin-top: 6px;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.15;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat .sub {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 0 22px 24px;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 150px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar h2 {
+      margin: 0 0 10px;
+      font-size: 14px;
+    }
+
+    .nav-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .nav-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--soft);
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .nav-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 13px;
+    }
+
+    .nav-price {
+      color: var(--muted);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .main {
+      display: grid;
+      gap: 12px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 150px 130px 130px 180px 1fr auto;
+      gap: 10px;
+      align-items: end;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .category {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .category:not(.collapsed) {
+      border-left: 4px solid var(--accent);
+    }
+
+    .category-header,
+    .group-header,
+    .item-header {
+      width: 100%;
+      min-height: 44px;
+      border: 0;
+      border-radius: 0;
+      display: grid;
+      gap: 10px;
+      align-items: center;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .category-header {
+      grid-template-columns: 28px 1fr auto auto auto;
+      padding: 10px 12px;
+      background: #edf3fa;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .category:not(.collapsed) > .category-header {
+      background: #dfeeff;
+    }
+
+    .group-header {
+      grid-template-columns: 28px 1fr auto auto;
+      padding: 9px 12px;
+      background: #f7f9fb;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .group:not(.collapsed) > .group-header {
+      background: #edf8f2;
+      box-shadow: inset 4px 0 0 #28a167;
+    }
+
+    .item-header {
+      grid-template-columns: 28px minmax(220px, 1.3fr) repeat(8, minmax(80px, .65fr)) 90px;
+      padding: 8px 12px;
+      background: #fff;
+      border-top: 1px solid #edf1f5;
+    }
+
+    .item:not(.collapsed) > .item-header {
+      background: #fff7e5;
+      box-shadow: inset 4px 0 0 #d99400;
+    }
+
+    .twisty {
+      width: 22px;
+      height: 22px;
+      border: 1px solid var(--line-dark);
+      border-radius: 5px;
+      display: grid;
+      place-items: center;
+      background: #fff;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .category:not(.collapsed) > .category-header .twisty,
+    .group:not(.collapsed) > .group-header .twisty,
+    .item:not(.collapsed) > .item-header .twisty {
+      border-color: currentColor;
+      background: #fff;
+      color: var(--accent);
+    }
+
+    .category.collapsed .category-body,
+    .group.collapsed .group-body,
+    .item.collapsed .item-body {
+      display: none;
+    }
+
+    .category.collapsed > .category-header .twisty::before,
+    .group.collapsed > .group-header .twisty::before,
+    .item.collapsed > .item-header .twisty::before {
+      content: "›";
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .category:not(.collapsed) > .category-header .twisty::before,
+    .group:not(.collapsed) > .group-header .twisty::before,
+    .item:not(.collapsed) > .item-header .twisty::before {
+      content: "⌄";
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .heading-main {
+      min-width: 0;
+    }
+
+    .heading-main strong {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 15px;
+    }
+
+    .heading-main small {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .pill {
+      min-height: 24px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 8px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #0f4ed2;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .money {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .category-tools,
+    .group-tools,
+    .item-tools {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .item-row-label {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .item-cell {
+      min-width: 0;
+    }
+
+    .item-cell strong {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 13px;
+    }
+
+    .item-body {
+      padding: 12px;
+      border-top: 1px solid #edf1f5;
+      background: #fcfdff;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .suppliers {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .supplier-head,
+    .supplier-row {
+      display: grid;
+      grid-template-columns: 42px 1fr 1fr 100px 110px 100px 90px 90px 90px 90px;
+      gap: 8px;
+      align-items: center;
+      padding: 8px;
+    }
+
+    .supplier-head {
+      border-bottom: 1px solid var(--line);
+      background: #f0f4f8;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .supplier-row {
+      border-bottom: 1px solid #edf1f5;
+    }
+
+    .supplier-row:last-child {
+      border-bottom: 0;
+    }
+
+    .chosen {
+      color: var(--good);
+      font-weight: 700;
+    }
+
+    .empty {
+      padding: 24px;
+      border: 1px dashed var(--line-dark);
+      border-radius: 8px;
+      background: var(--panel);
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      place-items: center;
+      padding: 28px;
+      background: rgba(12, 20, 28, .45);
+    }
+
+    .modal.open {
+      display: grid;
+    }
+
+    .modal-card {
+      width: min(860px, 100%);
+      max-height: min(760px, 92vh);
+      overflow: auto;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .22);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .modal-head h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .footer-note {
+      padding-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .cloud-status {
+      margin: 8px 0 0;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .cloud-status.ready {
+      border-color: #a8d8c0;
+      background: #eefaf4;
+      color: var(--good);
+    }
+
+    .sync-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .sync-form .field {
+      display: grid;
+      gap: 4px;
+    }
+
+    .history-card {
+      width: min(680px, 100%);
+    }
+
+    .history-list {
+      max-height: 58vh;
+      overflow: auto;
+      display: grid;
+      gap: 8px;
+      padding-right: 4px;
+    }
+
+    .history-row {
+      display: grid;
+      grid-template-columns: 74px 1fr auto;
+      gap: 10px;
+      align-items: start;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft);
+    }
+
+    .history-version {
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .history-main {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .history-project {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .history-meta {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .history-size {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="title-row">
+      <h1>USB按钮输入转换器成本表</h1>
+      <div class="product-switcher">
+        <label for="productSelect">当前产品</label>
+        <select id="productSelect"></select>
+        <input class="project-name" id="projectName" aria-label="产品名称" placeholder="产品名称">
+        <button id="addProductBtn">新增产品</button>
+        <button id="duplicateProductBtn">复制产品</button>
+        <button class="danger" id="deleteProductBtn">删除产品</button>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="expandAllBtn">全部展开</button>
+      <button id="collapseAllBtn">全部折叠</button>
+      <button id="exportCsvBtn">导出CSV</button>
+      <button id="exportJsonBtn">导出JSON</button>
+      <button id="importJsonBtn">导入JSON</button>
+      <button class="primary" id="saveCloudBtn">保存云端</button>
+      <button id="loadCloudBtn">读取云端</button>
+      <button id="cloudHistoryBtn">云端历史</button>
+      <button id="cloudConfigBtn">云端设置</button>
+      <button class="danger" id="resetBtn">清空当前</button>
+    </div>
+  </header>
+
+  <section class="unlock-strip">
+    <div class="unlock-title">产品成本解锁<span>token 只在本机输入，不提交到 GitHub</span></div>
+    <select id="vaultProductSelect" aria-label="选择要解锁的产品"></select>
+    <input id="productToken" type="password" autocomplete="off" placeholder="输入产品 token">
+    <button class="primary" id="unlockProductBtn">解锁产品</button>
+    <button id="lockLocalBtn">清除本机解锁</button>
+    <div class="unlock-status" id="unlockStatus">正在加载密文包...</div>
+  </section>
+
+  <section class="summary" id="summary"></section>
+
+  <main class="workspace">
+    <aside class="sidebar">
+      <h2>分类导航</h2>
+      <div class="nav-list" id="categoryNav"></div>
+      <p class="footer-note">解锁后的数据只保存在当前标签页会话；云端同步需要手动保存或读取。</p>
+      <p class="cloud-status" id="cloudStatus">云端未配置</p>
+    </aside>
+
+    <section class="main">
+      <div class="toolbar">
+        <div class="field">
+          <label for="batchQty">生产数量</label>
+          <input id="batchQty" type="number" min="1" step="1">
+        </div>
+        <div class="field">
+          <label for="currency">币种</label>
+          <select id="currency">
+            <option value="¥">¥ 人民币</option>
+            <option value="$">$ 美元</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="targetMargin">目标毛利率 %</label>
+          <input id="targetMargin" type="number" min="0" max="95" step="1">
+        </div>
+        <div class="field">
+          <label for="filterText">搜索物料/供应商</label>
+          <input id="filterText" placeholder="如 CH552、3PIN、灯圈">
+        </div>
+        <div class="field">
+          <label for="globalNote">项目备注</label>
+          <input id="globalNote" placeholder="版本、样机、量产、采购批次">
+        </div>
+        <button class="primary" id="addCategoryBtn">新增大类</button>
+      </div>
+
+      <div id="categories"></div>
+    </section>
+  </main>
+
+  <div class="modal" id="jsonModal" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 id="modalTitle">JSON</h2>
+        <div class="actions">
+          <button id="copyJsonBtn">复制</button>
+          <button class="primary" id="applyJsonBtn">应用导入</button>
+          <button id="closeModalBtn">关闭</button>
+        </div>
+      </div>
+      <textarea id="jsonText"></textarea>
+      <p class="footer-note">导入会覆盖当前浏览器里的表格数据，建议先导出备份。</p>
+    </div>
+  </div>
+
+  <div class="modal" id="cloudModal" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>云端同步设置</h2>
+        <div class="actions">
+          <button class="primary" id="saveCloudConfigBtn">保存设置</button>
+          <button id="closeCloudModalBtn">关闭</button>
+        </div>
+      </div>
+      <div class="sync-form">
+        <div class="field">
+          <label for="cloudEndpoint">Worker地址</label>
+          <input id="cloudEndpoint" placeholder="https://你的-worker.workers.dev">
+        </div>
+        <div class="field">
+          <label for="cloudDocKey">数据Key</label>
+          <input id="cloudDocKey" placeholder="usb-button-input-cost">
+        </div>
+        <div class="field">
+          <label for="cloudUser">你的名字</label>
+          <input id="cloudUser" placeholder="如 William / 采购A">
+        </div>
+        <div class="field">
+          <label for="cloudSecret">同步密钥</label>
+          <input id="cloudSecret" type="password" placeholder="只发给需要同步成本表的人">
+        </div>
+      </div>
+      <p class="footer-note">数据Key建议填 usb-button-input-cost；同步密钥才是 Cloudflare 里 SYNC_SECRET 的值。Worker地址不是GitHub仓库地址，是Cloudflare Worker部署出来的接口地址。</p>
+    </div>
+  </div>
+
+  <div class="modal" id="historyModal" role="dialog" aria-modal="true">
+    <div class="modal-card history-card">
+      <div class="modal-head">
+        <h2>云端历史记录</h2>
+        <div class="actions">
+          <button id="refreshHistoryBtn">刷新</button>
+          <button id="closeHistoryModalBtn">关闭</button>
+        </div>
+      </div>
+      <div class="history-list" id="historyList"></div>
+      <p class="footer-note">记录来自 Cloudflare Worker；旧 Worker 需要更新后，新的保存才会追加历史。</p>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "cost-planner-usb-mainboard-switch-adapter-v1";
+    const LEGACY_STORAGE_KEY = "cost-planner-ch552-usb-adapter-v1";
+    const CLOUD_CONFIG_KEY = "cost-planner-cloud-config-v1";
+    const DEFAULT_CLOUD_DOC_KEY = "usb-button-input-cost";
+    const DEFAULT_USER_NAME = "未填写";
+    const VAULT_URL = "data/cost-vault.json";
+
+    const blankProductTemplate = {
+      projectName: "未命名成本表",
+      batchQty: 100,
+      currency: "¥",
+      targetMargin: 35,
+      note: "",
+      categories: []
+    };
+
+    let store = loadStore();
+    let data = activeProduct();
+    let cloudConfig = loadCloudConfig();
+    let costVault = null;
+    let filterText = "";
+    let localSavedAt = store._cloud?.savedAt || "";
+
+    const el = {
+      vaultProductSelect: document.getElementById("vaultProductSelect"),
+      productToken: document.getElementById("productToken"),
+      unlockStatus: document.getElementById("unlockStatus"),
+      productSelect: document.getElementById("productSelect"),
+      projectName: document.getElementById("projectName"),
+      batchQty: document.getElementById("batchQty"),
+      currency: document.getElementById("currency"),
+      targetMargin: document.getElementById("targetMargin"),
+      globalNote: document.getElementById("globalNote"),
+      summary: document.getElementById("summary"),
+      categoryNav: document.getElementById("categoryNav"),
+      categories: document.getElementById("categories"),
+      filterText: document.getElementById("filterText"),
+      jsonModal: document.getElementById("jsonModal"),
+      jsonText: document.getElementById("jsonText"),
+      modalTitle: document.getElementById("modalTitle"),
+      applyJsonBtn: document.getElementById("applyJsonBtn"),
+      copyJsonBtn: document.getElementById("copyJsonBtn"),
+      cloudStatus: document.getElementById("cloudStatus"),
+      cloudModal: document.getElementById("cloudModal"),
+      cloudEndpoint: document.getElementById("cloudEndpoint"),
+      cloudDocKey: document.getElementById("cloudDocKey"),
+      cloudUser: document.getElementById("cloudUser"),
+      cloudSecret: document.getElementById("cloudSecret"),
+      historyModal: document.getElementById("historyModal"),
+      historyList: document.getElementById("historyList")
+    };
+
+    bindGlobalEvents();
+    render();
+    loadVault();
+
+    function uid() {
+      return Math.random().toString(36).slice(2, 10);
+    }
+
+    function category(name, note, groups) {
+      return { id: uid(), name, note, collapsed: false, groups };
+    }
+
+    function group(name, note, items) {
+      return { id: uid(), name, note, collapsed: false, items };
+    }
+
+    function item(name, designator, footprint, qty, unit, note, suppliers) {
+      return {
+        id: uid(),
+        name,
+        designator,
+        footprint,
+        qty,
+        unit,
+        lossRate: 0,
+        processCost: 0,
+        note,
+        chosenSupplierId: suppliers[0]?.id || "",
+        collapsed: true,
+        suppliers
+      };
+    }
+
+    function supplier(name, sku, model, price, shipping, moq, note) {
+      return {
+        id: uid(),
+        name,
+        sku,
+        model,
+        price,
+        shipping,
+        moq,
+        pricingMode: note === "batch" ? "batch" : "unit",
+        note
+      };
+    }
+
+    function loadStore() {
+      const raw = sessionStorage.getItem(STORAGE_KEY);
+      if (!raw) return createStore([]);
+      try {
+        return normalizeStore(JSON.parse(raw));
+      } catch {
+        return createStore([]);
+      }
+    }
+
+    function createStore(products = []) {
+      const normalizedProducts = products.map((product) => normalizeData(product));
+      normalizedProducts.forEach((product) => product.id ||= uid());
+      return {
+        version: 2,
+        activeProductId: normalizedProducts[0]?.id || "",
+        products: normalizedProducts
+      };
+    }
+
+    function normalizeStore(value) {
+      if (Array.isArray(value?.products)) {
+        const next = {
+          version: 2,
+          activeProductId: value.activeProductId || "",
+          products: value.products.map((product) => normalizeData(product)),
+          _cloud: value._cloud || null,
+          _localUpdatedAt: value._localUpdatedAt || ""
+        };
+        next.products.forEach((product) => product.id ||= uid());
+        if (next.products.length && !next.products.some((product) => product.id === next.activeProductId)) {
+          next.activeProductId = next.products[0].id;
+        }
+        return next;
+      }
+      return value?.categories ? createStore([value]) : createStore([]);
+    }
+
+    function normalizeData(value) {
+      const next = { ...clone(blankProductTemplate), ...value };
+      next.id ||= uid();
+      next.categories = Array.isArray(value?.categories) ? value.categories : [];
+      next.targetMargin ??= 35;
+      walkItems(next, (it) => {
+        it.suppliers ||= [];
+        it.chosenSupplierId ||= it.suppliers[0]?.id || "";
+        it.lossRate = number(it.lossRate);
+        it.processCost = number(it.processCost);
+        it.qty = number(it.qty);
+        it.suppliers.forEach((sp) => {
+          sp.pricingMode ||= sp.note === "batch" ? "batch" : "unit";
+        });
+      });
+      return next;
+    }
+
+    function clone(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function activeProduct() {
+      return store.products.find((product) => product.id === store.activeProductId) || store.products[0] || clone(blankProductTemplate);
+    }
+
+    function setActiveProduct(productId) {
+      const product = store.products.find((entry) => entry.id === productId);
+      if (!product) return;
+      store.activeProductId = product.id;
+      data = product;
+      filterText = "";
+      el.filterText.value = "";
+      save();
+      render();
+    }
+
+    function save() {
+      store._localUpdatedAt = new Date().toISOString();
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+    }
+
+    function loadCloudConfig() {
+      const fallback = { endpoint: "", docKey: DEFAULT_CLOUD_DOC_KEY, userName: "", secret: "" };
+      const raw = localStorage.getItem(CLOUD_CONFIG_KEY);
+      if (!raw) return fallback;
+      try {
+        return { ...fallback, ...JSON.parse(raw) };
+      } catch {
+        return fallback;
+      }
+    }
+
+    function saveCloudConfig() {
+      localStorage.setItem(CLOUD_CONFIG_KEY, JSON.stringify(cloudConfig));
+    }
+
+    function bindGlobalEvents() {
+      document.getElementById("unlockProductBtn").addEventListener("click", unlockProduct);
+      document.getElementById("lockLocalBtn").addEventListener("click", clearLocalUnlockedProducts);
+      el.productToken.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") unlockProduct();
+      });
+      el.productSelect.addEventListener("change", () => setActiveProduct(el.productSelect.value));
+      document.getElementById("addProductBtn").addEventListener("click", addProduct);
+      document.getElementById("duplicateProductBtn").addEventListener("click", duplicateProduct);
+      document.getElementById("deleteProductBtn").addEventListener("click", deleteProduct);
+      el.projectName.addEventListener("input", () => updateRoot("projectName", el.projectName.value));
+      el.batchQty.addEventListener("input", () => updateRoot("batchQty", number(el.batchQty.value)));
+      el.currency.addEventListener("change", () => updateRoot("currency", el.currency.value));
+      el.targetMargin.addEventListener("input", () => updateRoot("targetMargin", number(el.targetMargin.value)));
+      el.globalNote.addEventListener("input", () => updateRoot("note", el.globalNote.value));
+      el.filterText.addEventListener("input", () => {
+        filterText = el.filterText.value.trim().toLowerCase();
+        renderCategories();
+      });
+      document.getElementById("addCategoryBtn").addEventListener("click", addCategory);
+      document.getElementById("expandAllBtn").addEventListener("click", () => setAllCollapsed(false));
+      document.getElementById("collapseAllBtn").addEventListener("click", () => setAllCollapsed(true));
+      document.getElementById("exportCsvBtn").addEventListener("click", exportCsv);
+      document.getElementById("exportJsonBtn").addEventListener("click", openExportJson);
+      document.getElementById("importJsonBtn").addEventListener("click", openImportJson);
+      document.getElementById("saveCloudBtn").addEventListener("click", saveCloud);
+      document.getElementById("loadCloudBtn").addEventListener("click", loadCloud);
+      document.getElementById("cloudHistoryBtn").addEventListener("click", openCloudHistory);
+      document.getElementById("cloudConfigBtn").addEventListener("click", openCloudConfig);
+      document.getElementById("resetBtn").addEventListener("click", resetTemplate);
+      document.getElementById("closeModalBtn").addEventListener("click", closeModal);
+      document.getElementById("closeCloudModalBtn").addEventListener("click", closeCloudConfig);
+      document.getElementById("closeHistoryModalBtn").addEventListener("click", closeCloudHistory);
+      document.getElementById("refreshHistoryBtn").addEventListener("click", loadCloudHistory);
+      document.getElementById("saveCloudConfigBtn").addEventListener("click", applyCloudConfig);
+      el.copyJsonBtn.addEventListener("click", copyJson);
+      el.applyJsonBtn.addEventListener("click", applyJson);
+    }
+
+    function updateRoot(key, value) {
+      if (!store.products.length) return;
+      data[key] = value;
+      save();
+      if (key === "projectName") renderProductSelect();
+      renderCostViews();
+    }
+
+    async function loadVault() {
+      setUnlockStatus("正在加载密文包...");
+      try {
+        const response = await fetch(VAULT_URL, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        costVault = await response.json();
+        renderVaultOptions();
+        setUnlockStatus(`可解锁产品：${costVault.products?.length || 0} 个`);
+      } catch (error) {
+        costVault = { products: [] };
+        renderVaultOptions();
+        setUnlockStatus(`密文包读取失败：${error.message}`);
+      }
+    }
+
+    function renderVaultOptions() {
+      const products = Array.isArray(costVault?.products) ? costVault.products : [];
+      el.vaultProductSelect.innerHTML = products.length
+        ? products.map((product) => `<option value="${escapeAttr(product.id)}">${escapeHtml(product.label || product.id)}</option>`).join("")
+        : `<option value="">暂无可解锁产品</option>`;
+      el.vaultProductSelect.disabled = !products.length;
+      document.getElementById("unlockProductBtn").disabled = !products.length;
+    }
+
+    async function unlockProduct() {
+      if (!costVault) await loadVault();
+      const productId = el.vaultProductSelect.value;
+      const entry = costVault?.products?.find((product) => product.id === productId);
+      const token = el.productToken.value.trim();
+      if (!entry) {
+        alert("没有找到可解锁的产品。");
+        return;
+      }
+      if (!token) {
+        alert("请先输入产品 token。");
+        return;
+      }
+
+      setUnlockStatus("正在解锁...");
+      try {
+        const product = normalizeData(await decryptVaultProduct(entry, token));
+        product._vault = {
+          id: entry.id,
+          label: entry.label || "",
+          unlockedAt: new Date().toISOString()
+        };
+        const index = store.products.findIndex((item) => item.id === product.id || item._vault?.id === entry.id);
+        if (index >= 0) {
+          store.products[index] = product;
+        } else {
+          store.products.push(product);
+        }
+        store.activeProductId = product.id;
+        data = product;
+        el.productToken.value = "";
+        save();
+        render();
+        setUnlockStatus(`已解锁：${product.projectName || entry.label || product.id}`);
+      } catch {
+        setUnlockStatus("解锁失败");
+        alert("token 不匹配，或密文包已损坏。");
+      }
+    }
+
+    async function decryptVaultProduct(entry, token) {
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        new TextEncoder().encode(token),
+        "PBKDF2",
+        false,
+        ["deriveKey"]
+      );
+      const key = await crypto.subtle.deriveKey(
+        {
+          name: "PBKDF2",
+          salt: fromBase64(entry.salt),
+          iterations: number(costVault?.kdf?.iterations) || 210000,
+          hash: costVault?.kdf?.hash || "SHA-256"
+        },
+        keyMaterial,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["decrypt"]
+      );
+      const plaintext = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: fromBase64(entry.iv) },
+        key,
+        fromBase64(entry.ciphertext)
+      );
+      return JSON.parse(new TextDecoder().decode(plaintext));
+    }
+
+    function fromBase64(value) {
+      const binary = atob(value);
+      return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    }
+
+    function clearLocalUnlockedProducts() {
+      if (store.products.length && !confirm("清除当前浏览器里已解锁的产品数据？")) return;
+      sessionStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+      store = createStore([]);
+      data = activeProduct();
+      localSavedAt = "";
+      render();
+      setUnlockStatus("已清除本机解锁数据");
+    }
+
+    function setUnlockStatus(text) {
+      el.unlockStatus.textContent = text;
+    }
+
+    function addProduct() {
+      const name = prompt("产品名称", `新产品 ${store.products.length + 1}`);
+      if (!name) return;
+      const product = normalizeData(clone(blankProductTemplate));
+      product.id = uid();
+      product.projectName = name;
+      product.categories.forEach((cat) => cat.collapsed = false);
+      store.products.push(product);
+      store.activeProductId = product.id;
+      data = product;
+      save();
+      render();
+    }
+
+    function duplicateProduct() {
+      if (!store.products.length) return;
+      const name = prompt("复制后的产品名称", `${data.projectName || "未命名产品"} 副本`);
+      if (!name) return;
+      const product = normalizeData(clone(data));
+      product.id = uid();
+      product.projectName = name;
+      product._cloud = null;
+      product._localUpdatedAt = "";
+      store.products.push(product);
+      store.activeProductId = product.id;
+      data = product;
+      save();
+      render();
+    }
+
+    function deleteProduct() {
+      if (!store.products.length) {
+        alert("当前没有已解锁产品。");
+        return;
+      }
+      if (!confirm(`删除产品“${data.projectName || "未命名产品"}”？`)) return;
+      const deleteId = data.id;
+      store.products = store.products.filter((product) => product.id !== deleteId);
+      store.activeProductId = store.products[0]?.id || "";
+      data = activeProduct();
+      save();
+      render();
+    }
+
+    function render() {
+      data = activeProduct();
+      renderProductSelect();
+      el.projectName.value = data.projectName || "";
+      el.batchQty.value = data.batchQty || 1;
+      el.currency.value = data.currency || "¥";
+      el.targetMargin.value = data.targetMargin ?? 35;
+      el.globalNote.value = data.note || "";
+      const hasProducts = Boolean(store.products.length);
+      [
+        el.projectName,
+        el.batchQty,
+        el.currency,
+        el.targetMargin,
+        el.globalNote,
+        el.filterText,
+        document.getElementById("addCategoryBtn"),
+        document.getElementById("expandAllBtn"),
+        document.getElementById("collapseAllBtn"),
+        document.getElementById("exportCsvBtn"),
+        document.getElementById("exportJsonBtn"),
+        document.getElementById("saveCloudBtn"),
+        document.getElementById("resetBtn")
+      ].forEach((node) => node.disabled = !hasProducts);
+      renderSummary();
+      renderNav();
+      renderCategories();
+      renderCloudStatus();
+    }
+
+    function renderCostViews() {
+      renderSummary();
+      renderNav();
+      renderCategories();
+    }
+
+    function renderProductSelect() {
+      el.productSelect.innerHTML = store.products.length ? store.products.map((product) => `
+        <option value="${escapeAttr(product.id)}" ${product.id === store.activeProductId ? "selected" : ""}>
+          ${escapeHtml(product.projectName || "未命名产品")}
+        </option>
+      `).join("") : `<option value="">未解锁产品</option>`;
+      el.productSelect.disabled = !store.products.length;
+      document.getElementById("duplicateProductBtn").disabled = !store.products.length;
+      document.getElementById("deleteProductBtn").disabled = !store.products.length;
+    }
+
+    function renderCloudStatus() {
+      const ready = hasCloudConfig();
+      el.cloudStatus.classList.toggle("ready", ready);
+      el.cloudStatus.textContent = ready
+        ? `云端已配置：${cloudConfig.docKey} / ${cloudConfig.userName || DEFAULT_USER_NAME}`
+        : "云端未配置";
+    }
+
+    function renderSummary() {
+      if (!store.products.length) {
+        el.summary.innerHTML = [
+          stat("产品状态", "未解锁", "输入产品 token 后显示成本"),
+          stat("本机 token", "不保存", "关闭标签页后需重新输入"),
+          stat("GitHub 数据", "密文", "公开仓库不包含明文成本")
+        ].join("");
+        return;
+      }
+      const totals = calculateTotals();
+      el.summary.innerHTML = [
+        stat("单台总成本", money(totals.unitTotal), `${totals.itemCount} 个物料`),
+        stat("批次总成本", money(totals.batchTotal), `${data.batchQty || 1} 台`),
+        stat("建议售价/台", money(totals.suggestedPrice), `${formatNum(data.targetMargin ?? 0)}% 目标毛利`),
+        stat("预计毛利/台", money(totals.unitProfit), `批次 ${money(totals.batchProfit)}`),
+        stat("电子BOM", money(totals.byName["电子BOM"] || 0), "板上元件"),
+        stat("外购件/结构包装", money(sumKeys(totals.byName, ["接口与外购件", "PCB与外壳", "包装与辅料"])), "按钮线/外壳"),
+        stat("SMT与测试", money(totals.byName["SMT与测试"] || 0), "加工测试"),
+        stat("未选供应商", String(totals.missingSupplier), "需要补供应商")
+      ].join("");
+    }
+
+    function stat(label, value, sub) {
+      return `<div class="stat"><div class="label">${escapeHtml(label)}</div><div class="value">${escapeHtml(value)}</div><div class="sub">${escapeHtml(sub)}</div></div>`;
+    }
+
+    function renderNav() {
+      if (!store.products.length) {
+        el.categoryNav.innerHTML = `<div class="empty">未解锁产品。</div>`;
+        return;
+      }
+      const totals = calculateTotals();
+      el.categoryNav.innerHTML = data.categories.map((cat) => `
+        <a class="nav-item" href="#cat-${cat.id}">
+          <span class="nav-name">${escapeHtml(cat.name)}</span>
+          <span class="nav-price">${money(totals.byId[cat.id] || 0)}</span>
+        </a>
+      `).join("");
+    }
+
+    function renderCategories() {
+      if (!store.products.length) {
+        el.categories.innerHTML = `<div class="empty">输入产品 token 后显示成本计算。</div>`;
+        return;
+      }
+      const html = data.categories.map(renderCategory).filter(Boolean).join("");
+      el.categories.innerHTML = html || `<div class="empty">没有匹配的物料。</div>`;
+      bindRenderedEvents();
+    }
+
+    function renderCategory(cat) {
+      const groups = cat.groups.map((grp) => renderGroup(cat, grp)).filter(Boolean);
+      if (filterText && !matchesCategory(cat) && !groups.length) return "";
+      return `
+        <article class="category ${cat.collapsed ? "collapsed" : ""}" id="cat-${cat.id}">
+          <button class="category-header" data-toggle-category="${cat.id}">
+            <span class="twisty"></span>
+            <span class="heading-main"><strong>${escapeHtml(cat.name)}</strong><small>${escapeHtml(cat.note || "")}</small></span>
+            <span class="pill">${cat.groups.length}组 / ${itemCount(cat)}项</span>
+            <span class="money">${money(categoryTotal(cat))}</span>
+            <span class="category-tools">
+              <button data-action="add-group" data-category-id="${cat.id}">加子类</button>
+              <button data-action="edit-category" data-category-id="${cat.id}">编辑</button>
+            </span>
+          </button>
+          <div class="category-body">${groups.join("")}</div>
+        </article>
+      `;
+    }
+
+    function renderGroup(cat, grp) {
+      const items = grp.items.map((it) => renderItem(cat, grp, it)).filter(Boolean);
+      if (filterText && !matchesGroup(grp) && !items.length) return "";
+      return `
+        <section class="group ${grp.collapsed ? "collapsed" : ""}">
+          <button class="group-header" data-toggle-group="${cat.id}:${grp.id}">
+            <span class="twisty"></span>
+            <span class="heading-main"><strong>${escapeHtml(grp.name)}</strong><small>${escapeHtml(grp.note || "")}</small></span>
+            <span class="money">${money(groupTotal(grp))}</span>
+            <span class="group-tools">
+              <button data-action="add-item" data-category-id="${cat.id}" data-group-id="${grp.id}">加物料</button>
+              <button data-action="edit-group" data-category-id="${cat.id}" data-group-id="${grp.id}">编辑</button>
+            </span>
+          </button>
+          <div class="group-body">${items.join("")}</div>
+        </section>
+      `;
+    }
+
+    function renderItem(cat, grp, it) {
+      if (filterText && !matchesItem(it)) return "";
+      const chosen = getChosenSupplier(it);
+      return `
+        <section class="item ${it.collapsed ? "collapsed" : ""}">
+          <button class="item-header" data-toggle-item="${cat.id}:${grp.id}:${it.id}">
+            <span class="twisty"></span>
+            ${headerCell(it.name, "物料")}
+            ${headerCell(it.designator, "位号")}
+            ${headerCell(it.footprint, "规格")}
+            ${headerCell(formatNum(it.qty), "单台用量")}
+            ${headerCell(it.unit || "pcs", "单位")}
+            ${headerCell(percent(it.lossRate), "损耗")}
+            ${headerCell(chosen?.name || "未选", "供应商")}
+            ${headerCell(chosen?.sku || "-", "料号")}
+            ${headerCell(money(itemUnitCost(it)), "单台成本")}
+            <span class="item-tools"><button data-action="edit-item" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}">编辑</button></span>
+          </button>
+          <div class="item-body">
+            <div class="detail-grid">
+              ${fieldHtml("名称", "name", it.name, cat.id, grp.id, it.id)}
+              ${fieldHtml("位号/编号", "designator", it.designator, cat.id, grp.id, it.id)}
+              ${fieldHtml("封装/规格", "footprint", it.footprint, cat.id, grp.id, it.id)}
+              ${fieldHtml("单位", "unit", it.unit, cat.id, grp.id, it.id)}
+              ${fieldHtml("单台用量", "qty", it.qty, cat.id, grp.id, it.id, "number")}
+              ${fieldHtml("损耗率 %", "lossRate", it.lossRate, cat.id, grp.id, it.id, "number")}
+              ${fieldHtml("额外加工费/台", "processCost", it.processCost, cat.id, grp.id, it.id, "number")}
+              ${fieldHtml("备注", "note", it.note, cat.id, grp.id, it.id)}
+            </div>
+            <div class="suppliers">
+              <div class="supplier-head">
+                <span>选</span><span>供应商</span><span>型号/商品</span><span>料号/SKU</span><span>计价方式</span><span>单价/批次价</span><span>运费/台</span><span>MOQ</span><span>小计/台</span><span>操作</span>
+              </div>
+              ${it.suppliers.map((sp) => renderSupplier(cat, grp, it, sp)).join("")}
+            </div>
+            <div class="actions" style="justify-content:flex-start;margin-top:10px">
+              <button data-action="add-supplier" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}">新增供应商</button>
+              <button class="danger" data-action="delete-item" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}">删除物料</button>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderSupplier(cat, grp, it, sp) {
+      const checked = it.chosenSupplierId === sp.id;
+      return `
+        <div class="supplier-row">
+          <input type="checkbox" ${checked ? "checked" : ""} data-action="choose-supplier" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}" data-supplier-id="${sp.id}" aria-label="选择供应商">
+          <input value="${escapeAttr(sp.name)}" data-supplier-field="name" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}" data-supplier-id="${sp.id}">
+          <input value="${escapeAttr(sp.model)}" data-supplier-field="model" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}" data-supplier-id="${sp.id}">
+          <input value="${escapeAttr(sp.sku)}" data-supplier-field="sku" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}" data-supplier-id="${sp.id}">
+          <select data-supplier-field="pricingMode" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}" data-supplier-id="${sp.id}">
+            <option value="unit" ${sp.pricingMode === "batch" ? "" : "selected"}>单台单价</option>
+            <option value="batch" ${sp.pricingMode === "batch" ? "selected" : ""}>批次分摊</option>
+          </select>
+          <input type="number" min="0" step="0.0001" value="${escapeAttr(sp.price)}" data-supplier-field="price" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}" data-supplier-id="${sp.id}">
+          <input type="number" min="0" step="0.0001" value="${escapeAttr(sp.shipping)}" data-supplier-field="shipping" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}" data-supplier-id="${sp.id}">
+          <input type="number" min="0" step="1" value="${escapeAttr(sp.moq)}" data-supplier-field="moq" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}" data-supplier-id="${sp.id}">
+          <span class="${checked ? "chosen" : ""}">${money(supplierUnitCost(it, sp))}</span>
+          <button class="danger" data-action="delete-supplier" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}" data-supplier-id="${sp.id}">删除</button>
+        </div>
+      `;
+    }
+
+    function headerCell(value, label) {
+      return `<span class="item-cell"><span class="item-row-label">${escapeHtml(label)}</span><strong>${escapeHtml(value ?? "")}</strong></span>`;
+    }
+
+    function fieldHtml(label, field, value, catId, grpId, itemId, type = "text") {
+      return `<div class="field"><label>${escapeHtml(label)}</label><input type="${type}" value="${escapeAttr(value ?? "")}" data-item-field="${field}" data-category-id="${catId}" data-group-id="${grpId}" data-item-id="${itemId}"></div>`;
+    }
+
+    function bindRenderedEvents() {
+      document.querySelectorAll("[data-toggle-category]").forEach((node) => {
+        node.addEventListener("click", (event) => {
+          if (event.target.closest("[data-action]")) return;
+          const cat = findCategory(node.dataset.toggleCategory);
+          cat.collapsed = !cat.collapsed;
+          save();
+          renderCategories();
+        });
+      });
+      document.querySelectorAll("[data-toggle-group]").forEach((node) => {
+        node.addEventListener("click", (event) => {
+          if (event.target.closest("[data-action]")) return;
+          const [catId, grpId] = node.dataset.toggleGroup.split(":");
+          const grp = findGroup(catId, grpId);
+          grp.collapsed = !grp.collapsed;
+          save();
+          renderCategories();
+        });
+      });
+      document.querySelectorAll("[data-toggle-item]").forEach((node) => {
+        node.addEventListener("click", (event) => {
+          if (event.target.closest("[data-action]")) return;
+          const [catId, grpId, itemId] = node.dataset.toggleItem.split(":");
+          const it = findItem(catId, grpId, itemId);
+          it.collapsed = !it.collapsed;
+          save();
+          renderCategories();
+        });
+      });
+      document.querySelectorAll("[data-action]").forEach((node) => node.addEventListener("click", handleAction));
+      document.querySelectorAll("[data-item-field]").forEach((node) => node.addEventListener("input", handleItemField));
+      document.querySelectorAll("[data-supplier-field]").forEach((node) => {
+        node.addEventListener("input", handleSupplierField);
+        node.addEventListener("change", handleSupplierField);
+      });
+    }
+
+    function handleAction(event) {
+      const action = event.currentTarget.dataset.action;
+      if (!action) return;
+      event.stopPropagation();
+      const d = event.currentTarget.dataset;
+      if (action === "add-group") addGroup(d.categoryId);
+      if (action === "edit-category") editCategory(d.categoryId);
+      if (action === "add-item") addItem(d.categoryId, d.groupId);
+      if (action === "edit-group") editGroup(d.categoryId, d.groupId);
+      if (action === "edit-item") {
+        findItem(d.categoryId, d.groupId, d.itemId).collapsed = false;
+        save();
+        renderCategories();
+      }
+      if (action === "add-supplier") addSupplier(d.categoryId, d.groupId, d.itemId);
+      if (action === "delete-item") deleteItem(d.categoryId, d.groupId, d.itemId);
+      if (action === "delete-supplier") deleteSupplier(d.categoryId, d.groupId, d.itemId, d.supplierId);
+      if (action === "choose-supplier") chooseSupplier(d.categoryId, d.groupId, d.itemId, d.supplierId);
+    }
+
+    function handleItemField(event) {
+      const d = event.currentTarget.dataset;
+      const it = findItem(d.categoryId, d.groupId, d.itemId);
+      it[d.itemField] = event.currentTarget.type === "number" ? number(event.currentTarget.value) : event.currentTarget.value;
+      save();
+      renderCostViews();
+    }
+
+    function handleSupplierField(event) {
+      const d = event.currentTarget.dataset;
+      const sp = findSupplier(d.categoryId, d.groupId, d.itemId, d.supplierId);
+      sp[d.supplierField] = event.currentTarget.type === "number" ? number(event.currentTarget.value) : event.currentTarget.value;
+      save();
+      renderCostViews();
+    }
+
+    function addCategory() {
+      if (!store.products.length) return;
+      const name = prompt("大类名称", "新大类");
+      if (!name) return;
+      data.categories.push(category(name, "", []));
+      save();
+      render();
+    }
+
+    function editCategory(catId) {
+      const cat = findCategory(catId);
+      const name = prompt("大类名称", cat.name);
+      if (!name) return;
+      cat.name = name;
+      cat.note = prompt("大类备注", cat.note || "") ?? cat.note;
+      save();
+      render();
+    }
+
+    function addGroup(catId) {
+      const cat = findCategory(catId);
+      const name = prompt("子类名称", "新子类");
+      if (!name) return;
+      cat.groups.push(group(name, "", []));
+      cat.collapsed = false;
+      save();
+      render();
+    }
+
+    function editGroup(catId, grpId) {
+      const grp = findGroup(catId, grpId);
+      const name = prompt("子类名称", grp.name);
+      if (!name) return;
+      grp.name = name;
+      grp.note = prompt("子类备注", grp.note || "") ?? grp.note;
+      save();
+      renderCostViews();
+    }
+
+    function addItem(catId, grpId) {
+      const grp = findGroup(catId, grpId);
+      const name = prompt("物料名称", "新物料");
+      if (!name) return;
+      grp.items.push(item(name, "", "", 1, "pcs", "", [supplier("供应商", "", "", 0, 0, 1, "")]));
+      grp.collapsed = false;
+      save();
+      render();
+    }
+
+    function deleteItem(catId, grpId, itemId) {
+      if (!confirm("删除这个物料？")) return;
+      const grp = findGroup(catId, grpId);
+      grp.items = grp.items.filter((it) => it.id !== itemId);
+      save();
+      render();
+    }
+
+    function addSupplier(catId, grpId, itemId) {
+      const it = findItem(catId, grpId, itemId);
+      const sp = supplier("新供应商", "", "", 0, 0, 1, "");
+      it.suppliers.push(sp);
+      if (!it.chosenSupplierId) it.chosenSupplierId = sp.id;
+      save();
+      renderCostViews();
+    }
+
+    function deleteSupplier(catId, grpId, itemId, supplierId) {
+      const it = findItem(catId, grpId, itemId);
+      if (it.suppliers.length <= 1) {
+        alert("至少保留一个供应商候选。");
+        return;
+      }
+      it.suppliers = it.suppliers.filter((sp) => sp.id !== supplierId);
+      if (it.chosenSupplierId === supplierId) it.chosenSupplierId = it.suppliers[0]?.id || "";
+      save();
+      render();
+    }
+
+    function chooseSupplier(catId, grpId, itemId, supplierId) {
+      findItem(catId, grpId, itemId).chosenSupplierId = supplierId;
+      save();
+      render();
+    }
+
+    function setAllCollapsed(collapsed) {
+      data.categories.forEach((cat) => {
+        cat.collapsed = collapsed;
+        cat.groups.forEach((grp) => {
+          grp.collapsed = collapsed;
+          grp.items.forEach((it) => it.collapsed = collapsed);
+        });
+      });
+      save();
+      renderCostViews();
+    }
+
+    function resetTemplate() {
+      if (!store.products.length) return;
+      if (!confirm("清空当前产品数据？")) return;
+      const product = normalizeData(clone(blankProductTemplate));
+      product.id = data.id;
+      product.projectName = data.projectName || product.projectName;
+      const index = store.products.findIndex((entry) => entry.id === data.id);
+      store.products[index] = product;
+      data = product;
+      save();
+      render();
+    }
+
+    function openExportJson() {
+      if (!store.products.length) {
+        alert("请先解锁产品。");
+        return;
+      }
+      el.modalTitle.textContent = "导出JSON";
+      el.jsonText.value = JSON.stringify(store, null, 2);
+      el.applyJsonBtn.style.display = "none";
+      el.copyJsonBtn.style.display = "";
+      el.jsonModal.classList.add("open");
+    }
+
+    function openImportJson() {
+      el.modalTitle.textContent = "导入JSON";
+      el.jsonText.value = "";
+      el.applyJsonBtn.style.display = "";
+      el.copyJsonBtn.style.display = "none";
+      el.jsonModal.classList.add("open");
+    }
+
+    function closeModal() {
+      el.jsonModal.classList.remove("open");
+    }
+
+    function openCloudConfig() {
+      el.cloudEndpoint.value = cloudConfig.endpoint || "";
+      el.cloudDocKey.value = cloudConfig.docKey || DEFAULT_CLOUD_DOC_KEY;
+      el.cloudUser.value = cloudConfig.userName || "";
+      el.cloudSecret.value = cloudConfig.secret || "";
+      el.cloudModal.classList.add("open");
+    }
+
+    function closeCloudConfig() {
+      el.cloudModal.classList.remove("open");
+    }
+
+    function openCloudHistory() {
+      if (!ensureCloudConfig()) return;
+      el.historyModal.classList.add("open");
+      el.historyList.innerHTML = `<div class="empty">正在读取云端历史...</div>`;
+      loadCloudHistory();
+    }
+
+    function closeCloudHistory() {
+      el.historyModal.classList.remove("open");
+    }
+
+    function applyCloudConfig() {
+      const next = {
+        endpoint: normalizeEndpoint(el.cloudEndpoint.value),
+        docKey: el.cloudDocKey.value.trim() || DEFAULT_CLOUD_DOC_KEY,
+        userName: el.cloudUser.value.trim(),
+        secret: el.cloudSecret.value.trim()
+      };
+      if (!next.endpoint || !next.secret) {
+        alert("Worker地址和同步密钥都要填。");
+        return;
+      }
+      cloudConfig = next;
+      saveCloudConfig();
+      closeCloudConfig();
+      renderCloudStatus();
+    }
+
+    function hasCloudConfig() {
+      return Boolean(cloudConfig.endpoint && cloudConfig.docKey && cloudConfig.secret);
+    }
+
+    function normalizeEndpoint(value) {
+      return String(value || "").trim().replace(/\/+$/, "");
+    }
+
+    function cloudUrl() {
+      return `${normalizeEndpoint(cloudConfig.endpoint)}/${encodeURIComponent(cloudConfig.docKey || "default")}`;
+    }
+
+    function ensureCloudConfig() {
+      if (hasCloudConfig()) return true;
+      openCloudConfig();
+      alert("先填云端同步设置。");
+      return false;
+    }
+
+    async function saveCloud() {
+      if (!store.products.length) {
+        alert("请先解锁产品。");
+        return;
+      }
+      if (!ensureCloudConfig()) return;
+      try {
+        const remoteMeta = await getCloudMeta();
+        if (hasNewerRemote(remoteMeta)) {
+          const shouldOverwrite = confirm([
+            "云端已有更新的数据。",
+            "",
+            `最后保存人：${remoteMeta.updatedBy || "未填写"}`,
+            `最后保存时间：${formatDateTime(remoteMeta.updatedAt)}`,
+            `云端项目：${remoteMeta.projectName || "未命名"}`,
+            "",
+            "点“确定”会覆盖云端；点“取消”后请先读取云端。"
+          ].join("\n"));
+          if (!shouldOverwrite) {
+            const shouldLoad = confirm("现在读取云端数据吗？读取会覆盖当前浏览器数据。");
+            if (shouldLoad) await loadCloud({ skipConfirm: true });
+            return;
+          }
+        }
+
+        const savedAt = new Date().toISOString();
+        const payload = {
+          data: store,
+          savedAt,
+          updatedBy: cloudConfig.userName || DEFAULT_USER_NAME,
+          projectName: `${data.projectName || "未命名产品"} 等 ${store.products.length} 个产品`
+        };
+        const meta = await cloudRequest("PUT", payload);
+        store._cloud = {
+          savedAt: meta.updatedAt || savedAt,
+          savedBy: meta.updatedBy || cloudConfig.userName || DEFAULT_USER_NAME
+        };
+        localSavedAt = store._cloud.savedAt;
+        save();
+        alert("已保存到云端。");
+      } catch (error) {
+        alert(`保存失败：${error.message}`);
+      }
+    }
+
+    async function loadCloud(options = {}) {
+      if (!ensureCloudConfig()) return;
+      if (!options.skipConfirm && !confirm("读取云端会覆盖当前浏览器数据。确定？")) return;
+      try {
+        const payload = await cloudRequest("GET");
+        store = normalizeStore(payload.data || payload);
+        store._cloud = {
+          savedAt: payload.savedAt || payload.updatedAt || "",
+          savedBy: payload.updatedBy || ""
+        };
+        data = activeProduct();
+        localSavedAt = store._cloud.savedAt;
+        save();
+        render();
+        alert("已读取云端数据。");
+      } catch (error) {
+        alert(`读取失败：${error.message}`);
+      }
+    }
+
+    async function loadCloudHistory() {
+      if (!ensureCloudConfig()) return;
+      try {
+        const payload = await cloudRequest("GET", null, "?history=1");
+        renderCloudHistory(payload.history || []);
+      } catch (error) {
+        el.historyList.innerHTML = `<div class="empty">读取失败：${escapeHtml(error.message)}</div>`;
+      }
+    }
+
+    function renderCloudHistory(history) {
+      if (!history.length) {
+        el.historyList.innerHTML = `<div class="empty">暂无历史记录。更新 Worker 后，下一次保存会开始记录；如果已经更新过，就先点一次“保存云端”。</div>`;
+        return;
+      }
+      el.historyList.innerHTML = history.map((entry) => `
+        <div class="history-row">
+          <div class="history-version">v${escapeHtml(entry.version || "-")}</div>
+          <div class="history-main">
+            <div class="history-project" title="${escapeAttr(entry.projectName || "")}">${escapeHtml(entry.projectName || "未命名项目")}</div>
+            <div class="history-meta">保存人：${escapeHtml(entry.updatedBy || "未填写")}</div>
+            <div class="history-meta">时间：${escapeHtml(formatDateTime(entry.updatedAt))}</div>
+          </div>
+          <div class="history-size">${escapeHtml(formatBytes(entry.bytes))}</div>
+        </div>
+      `).join("");
+    }
+
+    async function cloudRequest(method, payload, suffix = "") {
+      const response = await fetch(`${cloudUrl()}${suffix}`, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          "X-Sync-Secret": cloudConfig.secret
+        },
+        body: payload ? JSON.stringify(payload) : undefined
+      });
+      const text = await response.text();
+      if (!response.ok) {
+        throw new Error(cloudErrorMessage(response.status, text));
+      }
+      return text ? JSON.parse(text) : {};
+    }
+
+    async function getCloudMeta() {
+      try {
+        return await cloudRequest("GET", null, "?meta=1");
+      } catch (error) {
+        if (!error.message.includes("云端还没有这份数据")) throw error;
+      }
+
+      try {
+        const payload = await cloudRequest("GET");
+        return {
+          updatedAt: payload.savedAt || payload.updatedAt || payload.data?._cloud?.savedAt || "",
+          updatedBy: payload.updatedBy || payload.data?._cloud?.savedBy || "旧版本保存",
+          projectName: payload.projectName || payload.data?.projectName || payload.data?.products?.[0]?.projectName || ""
+        };
+      } catch (error) {
+        if (error.message.includes("云端还没有这份数据")) return null;
+        throw error;
+      }
+    }
+
+    function hasNewerRemote(meta) {
+      if (!meta?.updatedAt) return false;
+      if (!localSavedAt) return true;
+      return Date.parse(meta.updatedAt) > Date.parse(localSavedAt);
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "未知";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleString("zh-CN", { hour12: false });
+    }
+
+    function cloudErrorMessage(status, text) {
+      try {
+        const body = JSON.parse(text || "{}");
+        if (body.error === "unauthorized") return "同步密钥不匹配。请检查云端设置里的“同步密钥”是否等于 Cloudflare Worker 的 SYNC_SECRET。";
+        if (body.error === "not found") return "云端还没有这份数据。请先点“保存云端”。";
+        if (body.error === "history not available") return "当前 Worker 还没更新历史记录接口。请把新的 cloudflare-worker.js 部署到 Cloudflare。";
+        if (body.error === "KV binding COST_DATA is missing") return "Worker 还没有绑定 KV，变量名必须是 COST_DATA。";
+        if (body.error === "Worker secret SYNC_SECRET is missing") return "Worker 还没有设置 Secret，变量名必须是 SYNC_SECRET。";
+        if (body.error) return body.error;
+      } catch {}
+      return text || `HTTP ${status}`;
+    }
+
+    async function copyJson() {
+      await navigator.clipboard.writeText(el.jsonText.value);
+    }
+
+    function applyJson() {
+      try {
+        store = normalizeStore(JSON.parse(el.jsonText.value));
+        data = activeProduct();
+        localSavedAt = store._cloud?.savedAt || "";
+        save();
+        closeModal();
+        render();
+      } catch {
+        alert("JSON格式不对。");
+      }
+    }
+
+    function exportCsv() {
+      if (!store.products.length) {
+        alert("请先解锁产品。");
+        return;
+      }
+      const totals = calculateTotals();
+      const rows = [
+        ["产品数量", store.products.length],
+        ["项目", data.projectName || ""],
+        ["生产数量", data.batchQty || 1],
+        ["目标毛利率%", data.targetMargin ?? 0],
+        ["单台总成本", totals.unitTotal],
+        ["建议售价/台", totals.suggestedPrice],
+        ["预计毛利/台", totals.unitProfit],
+        ["批次总成本", totals.batchTotal],
+        ["批次预计毛利", totals.batchProfit],
+        [],
+        ["大类", "子类", "物料", "位号", "规格", "单台用量", "单位", "损耗率%", "选中供应商", "料号/SKU", "型号", "计价方式", "单价/批次价", "运费/台", "加工费/台", "单台成本", "批次成本", "备注"]
+      ];
+      data.categories.forEach((cat) => {
+        cat.groups.forEach((grp) => {
+          grp.items.forEach((it) => {
+            const sp = getChosenSupplier(it) || {};
+            const unit = itemUnitCost(it);
+            rows.push([
+              cat.name,
+              grp.name,
+              it.name,
+              it.designator,
+              it.footprint,
+              it.qty,
+              it.unit,
+              it.lossRate,
+              sp.name || "",
+              sp.sku || "",
+              sp.model || "",
+              sp.pricingMode === "batch" ? "批次分摊" : "单台单价",
+              sp.price || 0,
+              sp.shipping || 0,
+              it.processCost || 0,
+              unit,
+              unit * number(data.batchQty || 1),
+              it.note || ""
+            ]);
+          });
+        });
+      });
+      downloadFile(`${data.projectName || "cost"}-成本表.csv`, "\ufeff" + rows.map((row) => row.map(csvCell).join(",")).join("\n"), "text/csv;charset=utf-8");
+    }
+
+    function csvCell(value) {
+      const text = String(value ?? "");
+      return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    }
+
+    function downloadFile(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function calculateTotals() {
+      const totals = {
+        unitTotal: 0,
+        batchTotal: 0,
+        suggestedPrice: 0,
+        unitProfit: 0,
+        batchProfit: 0,
+        itemCount: 0,
+        missingSupplier: 0,
+        byName: {},
+        byId: {}
+      };
+      data.categories.forEach((cat) => {
+        const total = categoryTotal(cat);
+        totals.unitTotal += total;
+        totals.byName[cat.name] = total;
+        totals.byId[cat.id] = total;
+        cat.groups.forEach((grp) => grp.items.forEach((it) => {
+          totals.itemCount += 1;
+          if (!getChosenSupplier(it)) totals.missingSupplier += 1;
+        }));
+      });
+      totals.batchTotal = totals.unitTotal * number(data.batchQty || 1);
+      const margin = Math.min(95, Math.max(0, number(data.targetMargin))) / 100;
+      totals.suggestedPrice = margin >= .95 ? totals.unitTotal : totals.unitTotal / (1 - margin);
+      totals.unitProfit = totals.suggestedPrice - totals.unitTotal;
+      totals.batchProfit = totals.unitProfit * number(data.batchQty || 1);
+      return totals;
+    }
+
+    function categoryTotal(cat) {
+      return cat.groups.reduce((sum, grp) => sum + groupTotal(grp), 0);
+    }
+
+    function groupTotal(grp) {
+      return grp.items.reduce((sum, it) => sum + itemUnitCost(it), 0);
+    }
+
+    function itemUnitCost(it) {
+      const sp = getChosenSupplier(it);
+      return (sp ? supplierUnitCost(it, sp) : 0) + number(it.processCost);
+    }
+
+    function supplierUnitCost(it, sp) {
+      if (sp.pricingMode === "batch") {
+        return number(sp.price) / Math.max(1, number(data.batchQty || 1)) + number(sp.shipping);
+      }
+      const qty = number(it.qty);
+      const loss = 1 + number(it.lossRate) / 100;
+      return qty * loss * number(sp.price) + number(sp.shipping);
+    }
+
+    function getChosenSupplier(it) {
+      return it.suppliers.find((sp) => sp.id === it.chosenSupplierId) || it.suppliers[0] || null;
+    }
+
+    function sumKeys(map, keys) {
+      return keys.reduce((sum, key) => sum + number(map[key]), 0);
+    }
+
+    function itemCount(cat) {
+      return cat.groups.reduce((sum, grp) => sum + grp.items.length, 0);
+    }
+
+    function walkItems(root, callback) {
+      root.categories?.forEach((cat) => cat.groups?.forEach((grp) => grp.items?.forEach(callback)));
+    }
+
+    function matchesCategory(cat) {
+      return [cat.name, cat.note].some((value) => String(value || "").toLowerCase().includes(filterText));
+    }
+
+    function matchesGroup(grp) {
+      return [grp.name, grp.note].some((value) => String(value || "").toLowerCase().includes(filterText));
+    }
+
+    function matchesItem(it) {
+      const supplierText = it.suppliers.map((sp) => [sp.name, sp.sku, sp.model, sp.note].join(" ")).join(" ");
+      return [it.name, it.designator, it.footprint, it.note, supplierText].some((value) => String(value || "").toLowerCase().includes(filterText));
+    }
+
+    function findCategory(catId) {
+      return data.categories.find((cat) => cat.id === catId);
+    }
+
+    function findGroup(catId, grpId) {
+      return findCategory(catId).groups.find((grp) => grp.id === grpId);
+    }
+
+    function findItem(catId, grpId, itemId) {
+      return findGroup(catId, grpId).items.find((it) => it.id === itemId);
+    }
+
+    function findSupplier(catId, grpId, itemId, supplierId) {
+      return findItem(catId, grpId, itemId).suppliers.find((sp) => sp.id === supplierId);
+    }
+
+    function number(value) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function formatNum(value) {
+      return new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 4 }).format(number(value));
+    }
+
+    function formatBytes(value) {
+      const bytes = number(value);
+      if (!bytes) return "-";
+      if (bytes < 1024) return `${bytes} B`;
+      return `${formatNum(bytes / 1024)} KB`;
+    }
+
+    function percent(value) {
+      return `${formatNum(value)}%`;
+    }
+
+    function money(value) {
+      return `${data.currency || "¥"}${new Intl.NumberFormat("zh-CN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 4
+      }).format(number(value))}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value);
+    }
+  </script>
+</body>
+</html>
