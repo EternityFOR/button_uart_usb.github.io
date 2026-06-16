@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>USB按钮输入转换器成本表</title>
+  <title>成本计算器</title>
   <style>
     :root {
       --bg: #f5f7fa;
@@ -632,7 +632,7 @@
 <body>
   <header class="topbar">
     <div class="title-row">
-      <h1>USB按钮输入转换器成本表</h1>
+      <h1>成本计算器</h1>
       <div class="product-switcher">
         <label for="productSelect">当前产品</label>
         <select id="productSelect"></select>
@@ -657,11 +657,11 @@
   </header>
 
   <section class="unlock-strip">
-    <div class="unlock-title">产品成本解锁<span>token 只在本机输入，不提交到 GitHub</span></div>
+    <div class="unlock-title">产品解锁</div>
     <select id="vaultProductSelect" aria-label="选择要解锁的产品"></select>
-    <input id="productToken" type="password" autocomplete="off" placeholder="输入产品 token">
+    <input id="productAccessCode" type="password" autocomplete="off" placeholder="输入访问码">
     <button class="primary" id="unlockProductBtn">解锁产品</button>
-    <button id="lockLocalBtn">清除本机解锁</button>
+    <button id="lockSessionBtn">清除解锁</button>
     <div class="unlock-status" id="unlockStatus">正在加载密文包...</div>
   </section>
 
@@ -671,7 +671,7 @@
     <aside class="sidebar">
       <h2>分类导航</h2>
       <div class="nav-list" id="categoryNav"></div>
-      <p class="footer-note">解锁后的数据只保存在当前标签页会话；云端同步需要手动保存或读取。</p>
+      <p class="footer-note">当前会话数据</p>
       <p class="cloud-status" id="cloudStatus">云端未配置</p>
     </aside>
 
@@ -694,7 +694,7 @@
         </div>
         <div class="field">
           <label for="filterText">搜索物料/供应商</label>
-          <input id="filterText" placeholder="如 CH552、3PIN、灯圈">
+          <input id="filterText" placeholder="如 物料、供应商、规格">
         </div>
         <div class="field">
           <label for="globalNote">项目备注</label>
@@ -738,7 +738,7 @@
         </div>
         <div class="field">
           <label for="cloudDocKey">数据Key</label>
-          <input id="cloudDocKey" placeholder="usb-button-input-cost">
+          <input id="cloudDocKey" placeholder="product-cost">
         </div>
         <div class="field">
           <label for="cloudUser">你的名字</label>
@@ -749,7 +749,7 @@
           <input id="cloudSecret" type="password" placeholder="只发给需要同步成本表的人">
         </div>
       </div>
-      <p class="footer-note">数据Key建议填 usb-button-input-cost；同步密钥才是 Cloudflare 里 SYNC_SECRET 的值。Worker地址不是GitHub仓库地址，是Cloudflare Worker部署出来的接口地址。</p>
+      <p class="footer-note">填写同步接口地址、数据Key、名称和同步密钥。</p>
     </div>
   </div>
 
@@ -771,7 +771,7 @@
     const STORAGE_KEY = "cost-planner-usb-mainboard-switch-adapter-v1";
     const LEGACY_STORAGE_KEY = "cost-planner-ch552-usb-adapter-v1";
     const CLOUD_CONFIG_KEY = "cost-planner-cloud-config-v1";
-    const DEFAULT_CLOUD_DOC_KEY = "usb-button-input-cost";
+    const DEFAULT_CLOUD_DOC_KEY = "product-cost";
     const DEFAULT_USER_NAME = "未填写";
     const VAULT_URL = "data/cost-vault.json";
 
@@ -793,7 +793,7 @@
 
     const el = {
       vaultProductSelect: document.getElementById("vaultProductSelect"),
-      productToken: document.getElementById("productToken"),
+      productAccessCode: document.getElementById("productAccessCode"),
       unlockStatus: document.getElementById("unlockStatus"),
       productSelect: document.getElementById("productSelect"),
       projectName: document.getElementById("projectName"),
@@ -964,8 +964,8 @@
 
     function bindGlobalEvents() {
       document.getElementById("unlockProductBtn").addEventListener("click", unlockProduct);
-      document.getElementById("lockLocalBtn").addEventListener("click", clearLocalUnlockedProducts);
-      el.productToken.addEventListener("keydown", (event) => {
+      document.getElementById("lockSessionBtn").addEventListener("click", clearUnlockedProducts);
+      el.productAccessCode.addEventListener("keydown", (event) => {
         if (event.key === "Enter") unlockProduct();
       });
       el.productSelect.addEventListener("change", () => setActiveProduct(el.productSelect.value));
@@ -1037,19 +1037,19 @@
       if (!costVault) await loadVault();
       const productId = el.vaultProductSelect.value;
       const entry = costVault?.products?.find((product) => product.id === productId);
-      const token = el.productToken.value.trim();
+      const accessCode = el.productAccessCode.value.trim();
       if (!entry) {
         alert("没有找到可解锁的产品。");
         return;
       }
-      if (!token) {
-        alert("请先输入产品 token。");
+      if (!accessCode) {
+        alert("请先输入访问码。");
         return;
       }
 
       setUnlockStatus("正在解锁...");
       try {
-        const product = normalizeData(await decryptVaultProduct(entry, token));
+        const product = normalizeData(await decryptVaultProduct(entry, accessCode));
         product._vault = {
           id: entry.id,
           label: entry.label || "",
@@ -1063,20 +1063,20 @@
         }
         store.activeProductId = product.id;
         data = product;
-        el.productToken.value = "";
+        el.productAccessCode.value = "";
         save();
         render();
         setUnlockStatus(`已解锁：${product.projectName || entry.label || product.id}`);
       } catch {
         setUnlockStatus("解锁失败");
-        alert("token 不匹配，或密文包已损坏。");
+        alert("访问码不匹配，或数据包已损坏。");
       }
     }
 
-    async function decryptVaultProduct(entry, token) {
+    async function decryptVaultProduct(entry, accessCode) {
       const keyMaterial = await crypto.subtle.importKey(
         "raw",
-        new TextEncoder().encode(token),
+        new TextEncoder().encode(accessCode),
         "PBKDF2",
         false,
         ["deriveKey"]
@@ -1106,7 +1106,7 @@
       return Uint8Array.from(binary, (char) => char.charCodeAt(0));
     }
 
-    function clearLocalUnlockedProducts() {
+    function clearUnlockedProducts() {
       if (store.products.length && !confirm("清除当前浏览器里已解锁的产品数据？")) return;
       sessionStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(STORAGE_KEY);
@@ -1115,7 +1115,7 @@
       data = activeProduct();
       localSavedAt = "";
       render();
-      setUnlockStatus("已清除本机解锁数据");
+      setUnlockStatus("已清除解锁数据");
     }
 
     function setUnlockStatus(text) {
@@ -1224,9 +1224,9 @@
     function renderSummary() {
       if (!store.products.length) {
         el.summary.innerHTML = [
-          stat("产品状态", "未解锁", "输入产品 token 后显示成本"),
-          stat("本机 token", "不保存", "关闭标签页后需重新输入"),
-          stat("GitHub 数据", "密文", "公开仓库不包含明文成本")
+          stat("产品状态", "未解锁", "等待解锁"),
+          stat("会话状态", "空", "当前标签页"),
+          stat("数据状态", "加密", "待解锁")
         ].join("");
         return;
       }
@@ -1263,7 +1263,7 @@
 
     function renderCategories() {
       if (!store.products.length) {
-        el.categories.innerHTML = `<div class="empty">输入产品 token 后显示成本计算。</div>`;
+        el.categories.innerHTML = `<div class="empty">待解锁。</div>`;
         return;
       }
       const html = data.categories.map(renderCategory).filter(Boolean).join("");

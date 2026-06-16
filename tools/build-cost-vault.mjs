@@ -23,13 +23,13 @@ const vault = {
 };
 
 for (const product of products.sort((a, b) => String(a.label).localeCompare(String(b.label), "zh-CN"))) {
-  if (!product.id || !product.label || !product.token || !product.data) {
-    throw new Error("Each product needs id, label, token, and data.");
+  if (!product.id || !product.label || !product.accessCode || !product.data) {
+    throw new Error("Each product needs id, label, accessCode, and data.");
   }
 
   const salt = webcrypto.getRandomValues(new Uint8Array(16));
   const iv = webcrypto.getRandomValues(new Uint8Array(12));
-  const key = await deriveKey(product.token, salt, vault.kdf.iterations);
+  const key = await deriveKey(product.accessCode, salt, vault.kdf.iterations);
   const plaintext = new TextEncoder().encode(JSON.stringify(product.data));
   const ciphertext = new Uint8Array(await webcrypto.subtle.encrypt({ name: "AES-GCM", iv }, key, plaintext));
 
@@ -54,14 +54,19 @@ async function loadProducts(source) {
     const names = await readdir(source);
     const files = names.filter((name) => name.toLowerCase().endsWith(".json")).sort();
     const entries = await Promise.all(files.map(async (name) => {
-      const product = JSON.parse(await readFile(path.join(source, name), "utf8"));
+      const product = await readJson(path.join(source, name));
       return Array.isArray(product.products) ? product.products : [product];
     }));
     return entries.flat();
   }
 
-  const value = JSON.parse(await readFile(source, "utf8"));
+  const value = await readJson(source);
   return Array.isArray(value.products) ? value.products : [value];
+}
+
+async function readJson(file) {
+  const text = await readFile(file, "utf8");
+  return JSON.parse(text.replace(/^\uFEFF/, ""));
 }
 
 async function safeStat(file) {
@@ -73,10 +78,10 @@ async function safeStat(file) {
   }
 }
 
-async function deriveKey(token, salt, iterations) {
+async function deriveKey(accessCode, salt, iterations) {
   const keyMaterial = await webcrypto.subtle.importKey(
     "raw",
-    new TextEncoder().encode(token),
+    new TextEncoder().encode(accessCode),
     "PBKDF2",
     false,
     ["deriveKey"]
