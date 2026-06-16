@@ -768,8 +768,8 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "cost-planner-usb-mainboard-switch-adapter-v1";
-    const LEGACY_STORAGE_KEY = "cost-planner-ch552-usb-adapter-v1";
+    const STORAGE_KEY = "dedge-cost-planner-session-v1";
+    const LEGACY_STORAGE_KEY = "cost-planner-v1";
     const CLOUD_CONFIG_KEY = "cost-planner-cloud-config-v1";
     const DEFAULT_CLOUD_DOC_KEY = "product-cost";
     const DEFAULT_USER_NAME = "未填写";
@@ -1237,7 +1237,7 @@
         stat("建议售价/台", money(totals.suggestedPrice), `${formatNum(data.targetMargin ?? 0)}% 目标毛利`),
         stat("预计毛利/台", money(totals.unitProfit), `批次 ${money(totals.batchProfit)}`),
         stat("电子BOM", money(totals.byName["电子BOM"] || 0), "板上元件"),
-        stat("外购件/结构包装", money(sumKeys(totals.byName, ["接口与外购件", "PCB与外壳", "包装与辅料"])), "按钮线/外壳"),
+        stat("外购件/结构包装", money(sumKeys(totals.byName, ["接口与外购件", "PCB与外壳", "包装与辅料"])), "结构/包装"),
         stat("SMT与测试", money(totals.byName["SMT与测试"] || 0), "加工测试"),
         stat("未选供应商", String(totals.missingSupplier), "需要补供应商")
       ].join("");

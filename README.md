@@ -1,16 +1,16 @@
-# button_uart_usb.github.io
+# DeDge Cost Planner
 
-静态成本计算页面。产品数据由 `data/cost-vault.json` 提供，使用访问码在浏览器内解锁。
+Diractive Edge 内部成本计算工具。页面使用 `data/cost-vault.json` 提供加密产品数据，输入访问码后在浏览器内解锁。
 
 ## 目录
 
 ```text
-index.html              页面入口
-cost-planner.html       成本表备用入口，和 index.html 保持一致
-data/cost-vault.json    加密成本包
-tools/                  本地维护脚本
-workers/                Cloudflare Worker 同步接口源码
-.private/products/      私有产品源
+index.html                 页面入口
+cost-planner.html          备用入口，和 index.html 保持一致
+data/cost-vault.json       加密成本包
+tools/                     本地维护脚本
+workers/                   Cloudflare Worker 同步接口源码
+.private/products/         私有产品源
 .private/access-codes.txt  访问码记录
 ```
 
