@@ -690,8 +690,16 @@
           </select>
         </div>
         <div class="field">
-          <label for="targetMargin">目标毛利率 %</label>
-          <input id="targetMargin" type="number" min="0" max="95" step="1">
+          <label for="targetNetMargin">目标净利率 %</label>
+          <input id="targetNetMargin" type="number" min="0" max="60" step="1">
+        </div>
+        <div class="field">
+          <label for="salesFeeRate">平台/支付费 %</label>
+          <input id="salesFeeRate" type="number" min="0" max="30" step="0.5">
+        </div>
+        <div class="field">
+          <label for="fixedLaunchCost">首发固定成本</label>
+          <input id="fixedLaunchCost" type="number" min="0" step="1">
         </div>
         <div class="field">
           <label for="filterText">搜索物料/供应商</label>
@@ -780,7 +788,9 @@
       projectName: "未命名成本表",
       batchQty: 100,
       currency: "¥",
-      targetMargin: 35,
+      targetNetMargin: 30,
+      salesFeeRate: 0,
+      fixedLaunchCost: 0,
       note: "",
       categories: []
     };
@@ -800,7 +810,9 @@
       projectName: document.getElementById("projectName"),
       batchQty: document.getElementById("batchQty"),
       currency: document.getElementById("currency"),
-      targetMargin: document.getElementById("targetMargin"),
+      targetNetMargin: document.getElementById("targetNetMargin"),
+      salesFeeRate: document.getElementById("salesFeeRate"),
+      fixedLaunchCost: document.getElementById("fixedLaunchCost"),
       globalNote: document.getElementById("globalNote"),
       summary: document.getElementById("summary"),
       categoryNav: document.getElementById("categoryNav"),
@@ -910,7 +922,9 @@
       const next = { ...clone(blankProductTemplate), ...value };
       next.id ||= uid();
       next.categories = Array.isArray(value?.categories) ? value.categories : [];
-      next.targetMargin ??= 35;
+      next.targetNetMargin = value?.targetNetMargin ?? value?.targetMargin ?? 30;
+      next.salesFeeRate = value?.salesFeeRate ?? 0;
+      next.fixedLaunchCost = value?.fixedLaunchCost ?? 0;
       walkItems(next, (it) => {
         it.suppliers ||= [];
         it.chosenSupplierId ||= it.suppliers[0]?.id || "";
@@ -976,7 +990,9 @@
       el.projectName.addEventListener("input", () => updateRoot("projectName", el.projectName.value));
       el.batchQty.addEventListener("input", () => updateRoot("batchQty", number(el.batchQty.value)));
       el.currency.addEventListener("change", () => updateRoot("currency", el.currency.value));
-      el.targetMargin.addEventListener("input", () => updateRoot("targetMargin", number(el.targetMargin.value)));
+      el.targetNetMargin.addEventListener("input", () => updateRoot("targetNetMargin", number(el.targetNetMargin.value)));
+      el.salesFeeRate.addEventListener("input", () => updateRoot("salesFeeRate", number(el.salesFeeRate.value)));
+      el.fixedLaunchCost.addEventListener("input", () => updateRoot("fixedLaunchCost", number(el.fixedLaunchCost.value)));
       el.globalNote.addEventListener("input", () => updateRoot("note", el.globalNote.value));
       el.filterText.addEventListener("input", () => {
         filterText = el.filterText.value.trim().toLowerCase();
@@ -1173,14 +1189,18 @@
       el.projectName.value = data.projectName || "";
       el.batchQty.value = data.batchQty || 1;
       el.currency.value = data.currency || "¥";
-      el.targetMargin.value = data.targetMargin ?? 35;
+      el.targetNetMargin.value = data.targetNetMargin ?? 30;
+      el.salesFeeRate.value = data.salesFeeRate ?? 0;
+      el.fixedLaunchCost.value = data.fixedLaunchCost ?? 0;
       el.globalNote.value = data.note || "";
       const hasProducts = Boolean(store.products.length);
       [
         el.projectName,
         el.batchQty,
         el.currency,
-        el.targetMargin,
+        el.targetNetMargin,
+        el.salesFeeRate,
+        el.fixedLaunchCost,
         el.globalNote,
         el.filterText,
         document.getElementById("addCategoryBtn"),
@@ -1233,13 +1253,13 @@
       }
       const totals = calculateTotals();
       el.summary.innerHTML = [
-        stat("单台总成本", money(totals.unitTotal), `${totals.itemCount} 个物料`),
-        stat("批次总成本", money(totals.batchTotal), `${data.batchQty || 1} 台`),
-        stat("建议售价/台", money(totals.suggestedPrice), `${formatNum(data.targetMargin ?? 0)}% 目标毛利`),
-        stat("预计毛利/台", money(totals.unitProfit), `批次 ${money(totals.batchProfit)}`),
-        stat("电子BOM", money(totals.byName["电子BOM"] || 0), "板上元件"),
-        stat("外购件/结构包装", money(sumKeys(totals.byName, ["接口与外购件", "PCB与外壳", "包装与辅料"])), "结构/包装"),
-        stat("SMT与测试", money(totals.byName["SMT与测试"] || 0), "加工测试"),
+        stat("单台经济成本", money(totals.unitTotal), `${totals.itemCount} 个成本项目`),
+        stat("产品批次成本", money(totals.batchTotal), `${data.batchQty || 1} 台`),
+        stat("首发固定成本", money(totals.fixedLaunchCost), "认证、签名、工程验证等"),
+        stat("首发总经济成本", money(totals.fullLaunchCost), "产品批次 + 固定投入"),
+        stat("建议公开售价/台", money(totals.suggestedPrice), `最低 ${money(totals.minimumPrice)}`),
+        stat("预计净利/台", money(totals.unitProfit), `${formatNum(totals.realizedNetMargin)}% 实际净利率`),
+        stat("平台/支付扣减", money(totals.salesFeeTotal), `${formatNum(data.salesFeeRate ?? 0)}% / 批次`),
         stat("未选供应商", String(totals.missingSupplier), "需要补供应商")
       ].join("");
     }
@@ -1832,12 +1852,18 @@
         ["产品数量", store.products.length],
         ["项目", data.projectName || ""],
         ["生产数量", data.batchQty || 1],
-        ["目标毛利率%", data.targetMargin ?? 0],
-        ["单台总成本", totals.unitTotal],
-        ["建议售价/台", totals.suggestedPrice],
-        ["预计毛利/台", totals.unitProfit],
-        ["批次总成本", totals.batchTotal],
-        ["批次预计毛利", totals.batchProfit],
+        ["目标净利率%", data.targetNetMargin ?? 0],
+        ["平台及支付扣费率%", data.salesFeeRate ?? 0],
+        ["首发固定成本", totals.fixedLaunchCost],
+        ["单台经济成本", totals.unitTotal],
+        ["产品批次成本", totals.batchTotal],
+        ["首发总经济成本", totals.fullLaunchCost],
+        ["达到目标净利的最低售价/台", totals.minimumPrice],
+        ["建议公开售价/台", totals.suggestedPrice],
+        ["预计净利/台", totals.unitProfit],
+        ["批次平台及支付扣减", totals.salesFeeTotal],
+        ["批次预计净利", totals.batchProfit],
+        ["建议售价实际净利率%", totals.realizedNetMargin],
         [],
         ["大类", "子类", "物料", "位号", "规格", "单台用量", "单位", "损耗率%", "选中供应商", "料号/SKU", "型号", "计价方式", "单价/批次价", "运费/台", "加工费/台", "单台成本", "批次成本", "备注"]
       ];
@@ -1891,9 +1917,14 @@
       const totals = {
         unitTotal: 0,
         batchTotal: 0,
+        fixedLaunchCost: 0,
+        fullLaunchCost: 0,
+        minimumPrice: 0,
         suggestedPrice: 0,
         unitProfit: 0,
         batchProfit: 0,
+        salesFeeTotal: 0,
+        realizedNetMargin: 0,
         itemCount: 0,
         missingSupplier: 0,
         byName: {},
@@ -1909,12 +1940,28 @@
           if (!getChosenSupplier(it)) totals.missingSupplier += 1;
         }));
       });
-      totals.batchTotal = totals.unitTotal * number(data.batchQty || 1);
-      const margin = Math.min(95, Math.max(0, number(data.targetMargin))) / 100;
-      totals.suggestedPrice = margin >= .95 ? totals.unitTotal : totals.unitTotal / (1 - margin);
-      totals.unitProfit = totals.suggestedPrice - totals.unitTotal;
-      totals.batchProfit = totals.unitProfit * number(data.batchQty || 1);
+      const batchQty = Math.max(1, number(data.batchQty || 1));
+      totals.batchTotal = totals.unitTotal * batchQty;
+      totals.fixedLaunchCost = Math.max(0, number(data.fixedLaunchCost));
+      totals.fullLaunchCost = totals.batchTotal + totals.fixedLaunchCost;
+      const targetNetMargin = Math.min(60, Math.max(0, number(data.targetNetMargin))) / 100;
+      const salesFeeRate = Math.min(30, Math.max(0, number(data.salesFeeRate))) / 100;
+      const retainedRevenueRate = 1 - targetNetMargin - salesFeeRate;
+      totals.minimumPrice = retainedRevenueRate > 0
+        ? totals.fullLaunchCost / retainedRevenueRate / batchQty
+        : 0;
+      totals.suggestedPrice = roundRetailPrice(totals.minimumPrice);
+      const grossRevenue = totals.suggestedPrice * batchQty;
+      totals.salesFeeTotal = grossRevenue * salesFeeRate;
+      totals.batchProfit = grossRevenue - totals.salesFeeTotal - totals.fullLaunchCost;
+      totals.unitProfit = totals.batchProfit / batchQty;
+      totals.realizedNetMargin = grossRevenue > 0 ? totals.batchProfit / grossRevenue * 100 : 0;
       return totals;
+    }
+
+    function roundRetailPrice(value) {
+      if (!Number.isFinite(value) || value <= 0) return 0;
+      return Math.ceil((value + 1) / 10) * 10 - 1;
     }
 
     function categoryTotal(cat) {
