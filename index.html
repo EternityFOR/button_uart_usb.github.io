@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>产品成本与首发项目利润规划器</title>
+  <title>产品成本统筹器</title>
   <style>
     :root {
       --bg: #f5f7fa;
@@ -220,13 +220,9 @@
     }
 
     .summary {
-      display: grid;
-      grid-template-columns: minmax(280px, .68fr) minmax(560px, 1.32fr);
-      gap: 14px;
       min-width: 0;
     }
 
-    .summary-card,
     .assumptions-panel,
     .editor-toolbar,
     .sidebar,
@@ -236,223 +232,63 @@
       background: var(--panel);
     }
 
-    .summary-card {
-      padding: 16px;
+    .cost-overview {
+      display: grid;
+      grid-template-columns: minmax(190px, 1.35fr) repeat(4, minmax(125px, 1fr)) minmax(155px, 1fr);
       min-width: 0;
-    }
-
-    .decision-card {
-      border-top: 4px solid var(--accent);
-    }
-
-    .decision-label,
-    .summary-title,
-    .bridge-label,
-    .equation-label {
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .decision-price {
-      margin-top: 8px;
-      font-size: 40px;
-      font-weight: 850;
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .decision-subtitle {
-      margin-top: 7px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .decision-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 16px;
-    }
-
-    .decision-metric {
-      padding: 10px;
+      overflow: hidden;
       border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--soft);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
     }
 
-    .decision-metric strong {
-      display: block;
-      margin-top: 4px;
-      font-size: 18px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .cost-formation {
-      border-top: 4px solid #2d7fd3;
-    }
-
-    .summary-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .summary-head h2,
-    .section-heading h2 {
-      margin: 3px 0 0;
-      font-size: 18px;
-    }
-
-    .summary-head p,
-    .section-heading p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.5;
-    }
-
-    .cost-equation {
-      display: grid;
-      grid-template-columns: minmax(130px, 1fr) 24px minmax(130px, 1fr) 24px minmax(150px, 1.08fr);
-      gap: 8px;
-      align-items: stretch;
-    }
-
-    .equation-node {
+    .overview-metric {
       min-width: 0;
-      padding: 11px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--soft);
-    }
-
-    .equation-node.cost { background: var(--cost-soft); border-color: #c9ddf7; }
-    .equation-node.fixed { background: var(--amber-soft); border-color: #efd69d; }
-    .equation-node.full { background: #f3f0ff; border-color: #d8cdf5; }
-    .equation-node.price { background: var(--good-soft); border-color: #b8dec9; }
-
-    .equation-node strong {
-      display: block;
-      margin-top: 5px;
-      font-size: 20px;
-      font-variant-numeric: tabular-nums;
-      overflow-wrap: anywhere;
-    }
-
-    .equation-node small {
-      display: block;
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.4;
-    }
-
-    .equation-operator {
+      min-height: 62px;
       display: grid;
-      place-items: center;
-      color: var(--muted);
-      font-size: 20px;
-      font-weight: 800;
+      align-content: center;
+      gap: 3px;
+      padding: 8px 12px;
+      border-left: 1px solid var(--line);
     }
 
-    .formula-line {
-      margin-top: 10px;
-      padding: 9px 11px;
-      border-left: 3px solid var(--accent);
-      background: #f7f9fc;
-      color: #354657;
-      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-      font-size: 12px;
-      line-height: 1.5;
-      overflow-wrap: anywhere;
+    .overview-metric:first-child {
+      border-left: 4px solid var(--accent);
     }
 
-    .formula-line strong {
-      color: var(--text);
-      font-size: 14px;
+    .overview-metric.primary {
+      background: var(--cost-soft);
     }
 
-    .profit-bridge {
-      grid-column: 1 / -1;
-      border-top: 4px solid var(--good);
-    }
-
-    .bridge-track {
-      display: flex;
-      align-items: stretch;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-    }
-
-    .bridge-node {
-      flex: 1 0 150px;
-      min-width: 150px;
-      padding: 10px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--soft);
-    }
-
-    .bridge-node.deduction { background: var(--danger-soft); border-color: #f0c1ba; }
-    .bridge-node.cost { background: var(--cost-soft); border-color: #c9ddf7; }
-    .bridge-node.fixed { background: var(--amber-soft); border-color: #efd69d; }
-    .bridge-node.profit { background: var(--good-soft); border-color: #b8dec9; }
-
-    .bridge-node strong {
-      display: block;
-      margin-top: 5px;
-      font-size: 17px;
-      font-variant-numeric: tabular-nums;
-      overflow-wrap: anywhere;
-    }
-
-    .bridge-node small {
-      display: block;
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.4;
-    }
-
-    .bridge-operator {
-      flex: 0 0 22px;
-      display: grid;
-      place-items: center;
-      color: var(--muted);
-      font-size: 18px;
-      font-weight: 800;
-    }
-
-    .summary-alert {
-      grid-column: 1 / -1;
-      padding: 10px 12px;
-      border: 1px solid #efcf8d;
-      border-radius: 6px;
+    .overview-metric.warning {
       background: var(--amber-soft);
-      color: #714600;
-      font-size: 13px;
     }
 
-    .summary-alert.good {
-      border-color: #a8d8c0;
-      background: var(--good-soft);
-      color: #0c603f;
+    .overview-label {
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .overview-value {
+      overflow: hidden;
+      font-size: 17px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .overview-metric.primary .overview-value {
+      font-size: 23px;
     }
 
     .locked-summary {
-      grid-column: 1 / -1;
-      display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .locked-summary .decision-metric {
-      min-height: 72px;
     }
 
     .workspace {
@@ -520,27 +356,38 @@
       max-width: 100%;
     }
 
+    #categories {
+      display: grid;
+      gap: 10px;
+    }
+
     .assumptions-panel {
-      padding: 14px;
+      display: grid;
+      grid-template-columns: 92px minmax(0, 1fr);
+      gap: 12px;
+      align-items: end;
+      padding: 10px 12px;
     }
 
-    .section-heading {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 18px;
-      margin-bottom: 12px;
+    .parameters-title {
+      display: grid;
+      gap: 2px;
+      align-self: center;
     }
 
-    .section-heading p {
-      max-width: 620px;
-      text-align: right;
+    .parameters-title strong {
+      font-size: 13px;
+    }
+
+    .parameters-title span {
+      color: var(--muted);
+      font-size: 11px;
     }
 
     .assumption-grid {
       display: grid;
-      grid-template-columns: minmax(120px, .8fr) minmax(130px, .8fr) minmax(170px, 1fr) minmax(170px, 1fr) minmax(220px, 1.4fr);
-      gap: 10px;
+      grid-template-columns: minmax(105px, .72fr) minmax(115px, .72fr) minmax(150px, 1fr) minmax(150px, 1fr) minmax(170px, 1.15fr);
+      gap: 8px;
       align-items: end;
     }
 
@@ -568,6 +415,7 @@
     }
 
     .category {
+      position: relative;
       min-width: 0;
       max-width: 100%;
       overflow: hidden;
@@ -576,7 +424,6 @@
       border-radius: 8px;
       background: var(--panel);
       box-shadow: var(--shadow);
-      position: relative;
     }
 
     .category.scope-post-sale {
@@ -588,7 +435,6 @@
     .item-header {
       width: 100%;
       min-width: 0;
-      min-height: 44px;
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 10px;
@@ -596,6 +442,7 @@
     }
 
     .category-header {
+      min-height: 46px;
       padding: 10px 12px;
       background: #edf3fa;
       border-bottom: 1px solid var(--line);
@@ -613,27 +460,106 @@
       background: #e9e0f8;
     }
 
+    .category.collapsed > .category-header {
+      border-bottom: 0;
+    }
+
+    .category-body {
+      position: relative;
+      padding: 6px 8px 9px 24px;
+      background: #f7f9fc;
+    }
+
+    .category-body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 12px;
+      left: 15px;
+      border-left: 2px solid #bfd0e1;
+    }
+
+    .group {
+      position: relative;
+      margin: 6px 0;
+      border: 1px solid #cedae6;
+      border-radius: 7px;
+      background: #fff;
+    }
+
+    .group::before {
+      content: "";
+      position: absolute;
+      top: 20px;
+      left: -10px;
+      width: 10px;
+      border-top: 2px solid #bfd0e1;
+    }
+
     .group-header {
-      padding: 9px 12px;
-      background: #f7f9fb;
-      border-top: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
+      min-height: 40px;
+      padding: 7px 10px;
+      border-radius: 6px 6px 0 0;
+      background: #f2f6f9;
+      border-bottom: 1px solid #d8e1ea;
     }
 
     .group:not(.collapsed) > .group-header {
-      background: #edf8f2;
-      box-shadow: inset 4px 0 0 #28a167;
+      background: #eef8f3;
+      box-shadow: inset 3px 0 0 #28a167;
+    }
+
+    .group.collapsed > .group-header {
+      border-bottom: 0;
+      border-radius: 6px;
+    }
+
+    .group-body {
+      position: relative;
+      padding: 5px 7px 7px 24px;
+      background: #fbfcfd;
+    }
+
+    .group-body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 11px;
+      left: 15px;
+      border-left: 2px solid #d4dde6;
+    }
+
+    .item {
+      position: relative;
+      margin: 5px 0;
+      border: 1px solid #dce4ec;
+      border-left: 3px solid #d99400;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .item::before {
+      content: "";
+      position: absolute;
+      top: 18px;
+      left: -11px;
+      width: 9px;
+      border-top: 2px solid #d4dde6;
     }
 
     .item-header {
-      padding: 8px 12px;
+      min-height: 36px;
+      padding: 6px 9px;
+      border-radius: 5px 5px 0 0;
       background: #fff;
-      border-top: 1px solid #edf1f5;
     }
 
     .item:not(.collapsed) > .item-header {
       background: #fff7e5;
-      box-shadow: inset 4px 0 0 #d99400;
+    }
+
+    .item.collapsed > .item-header {
+      border-radius: 5px;
     }
 
     .header-toggle {
@@ -718,23 +644,68 @@
 
     .heading-main {
       min-width: 0;
+      display: grid;
+      grid-template-columns: 43px minmax(0, 1fr);
+      grid-template-rows: auto auto;
+      column-gap: 8px;
+      align-items: center;
+    }
+
+    .heading-main::before {
+      grid-row: 1 / 3;
+      min-height: 20px;
+      display: inline-grid;
+      place-items: center;
+      align-self: center;
+      border: 1px solid var(--line-dark);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .category-header > .category-toggle .heading-main::before {
+      content: "大类";
+      border-color: #9cbfe5;
+      color: #195b9e;
+    }
+
+    .group-header > .group-toggle .heading-main::before {
+      content: "子类";
+      border-color: #9dcfb5;
+      color: #167047;
+    }
+
+    .item-header > .item-toggle .heading-main::before {
+      content: "成本项";
+      border-color: #e2c071;
+      color: #8a5700;
     }
 
     .heading-main strong {
-      display: block;
+      grid-column: 2;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      font-size: 15px;
+      font-size: 14px;
     }
 
     .heading-main small {
-      display: block;
+      grid-column: 2;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       color: var(--muted);
       font-size: 12px;
+    }
+
+    .category-header .heading-main strong {
+      font-size: 15px;
+    }
+
+    .item-header .heading-main strong {
+      font-size: 13px;
     }
 
     .pill {
@@ -785,9 +756,10 @@
     }
 
     .item-body {
-      padding: 12px;
-      border-top: 1px solid #edf1f5;
-      background: #fcfdff;
+      padding: 10px;
+      border-top: 1px solid #eadfbd;
+      border-radius: 0 0 5px 5px;
+      background: #fffdf8;
     }
 
     .detail-grid {
@@ -801,8 +773,8 @@
       width: 100%;
       max-width: 100%;
       overflow-x: auto;
-      border: 1px solid var(--line);
-      border-radius: 8px;
+      border: 1px solid #ccd8e4;
+      border-radius: 6px;
       background: #fff;
     }
 
@@ -818,9 +790,10 @@
 
     .supplier-head {
       border-bottom: 1px solid var(--line);
-      background: #f0f4f8;
+      background: #eaf0f6;
       color: var(--muted);
       font-size: 12px;
+      font-weight: 700;
     }
 
     .supplier-row {
@@ -1016,15 +989,6 @@
         grid-column: 2 / -1;
       }
 
-      .summary {
-        grid-template-columns: 1fr;
-      }
-
-      .profit-bridge,
-      .summary-alert {
-        grid-column: auto;
-      }
-
       .workspace {
         grid-template-columns: minmax(0, 1fr);
       }
@@ -1044,6 +1008,16 @@
         flex: 0 0 min(240px, 72vw);
       }
 
+      .assumptions-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .parameters-title {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+      }
+
       .assumption-grid {
         grid-template-columns: repeat(3, minmax(140px, 1fr));
       }
@@ -1055,6 +1029,12 @@
       .editor-actions {
         grid-column: 1 / -1;
         justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .cost-overview {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
     }
 
@@ -1075,16 +1055,28 @@
 
       .command-bar,
       .command-group {
-        width: 100%;
         justify-content: flex-start;
       }
 
+      .command-bar {
+        width: 100%;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 3px;
+      }
+
       .command-group {
-        flex-wrap: wrap;
-        padding-right: 0;
-        padding-bottom: 7px;
-        border-right: 0;
-        border-bottom: 1px solid var(--line);
+        width: auto;
+        flex: 0 0 auto;
+        flex-wrap: nowrap;
+        padding-right: 8px;
+        padding-bottom: 0;
+        border-right: 1px solid var(--line);
+        border-bottom: 0;
+      }
+
+      .command-bar > button {
+        flex: 0 0 auto;
       }
 
       .product-switcher {
@@ -1123,14 +1115,17 @@
         grid-column: 1 / -1;
       }
 
-      .section-heading {
-        display: grid;
-        gap: 6px;
+      .cost-overview {
+        display: flex;
+        overflow-x: auto;
       }
 
-      .section-heading p {
-        max-width: none;
-        text-align: left;
+      .overview-metric {
+        flex: 0 0 158px;
+      }
+
+      .overview-metric.primary {
+        flex-basis: 180px;
       }
 
       .assumption-grid {
@@ -1149,17 +1144,8 @@
         grid-column: auto;
       }
 
-      .decision-grid,
       .locked-summary {
         grid-template-columns: 1fr;
-      }
-
-      .cost-equation {
-        grid-template-columns: 1fr;
-      }
-
-      .equation-operator {
-        min-height: 20px;
       }
 
       .category-header,
@@ -1200,23 +1186,34 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
+      .category-body {
+        padding-left: 19px;
+      }
+
+      .category-body::before {
+        left: 11px;
+      }
+
+      .group-body {
+        padding-left: 19px;
+      }
+
+      .group-body::before {
+        left: 11px;
+      }
+
       .modal {
         padding: 12px;
       }
     }
 
     @media (max-width: 480px) {
-      .assumption-grid,
       .detail-grid {
         grid-template-columns: 1fr;
       }
 
       .assumption-grid .field:last-child {
-        grid-column: auto;
-      }
-
-      .decision-price {
-        font-size: 34px;
+        grid-column: 1 / -1;
       }
 
       .product-actions button,
@@ -1231,8 +1228,8 @@
     <div class="header-primary">
       <div class="app-title">
         <span class="eyebrow">DeDge Cost Planner</span>
-        <h1>产品成本与首发项目利润规划器</h1>
-        <p>从履约成本、固定投入和渠道扣减反推可执行售价。</p>
+        <h1>产品成本统筹器</h1>
+        <p>汇总并分类产品的单位成本、批次成本与供应商报价。</p>
       </div>
       <div class="actions command-bar">
         <div class="command-group" aria-label="数据操作">
@@ -1274,16 +1271,13 @@
     <section class="summary" id="summary"></section>
 
     <section class="assumptions-panel">
-      <div class="section-heading">
-        <div>
-          <span class="eyebrow">Pricing assumptions</span>
-          <h2>定价假设</h2>
-        </div>
-        <p>这些参数决定单位首发完全成本如何转换为最低平均售价。</p>
+      <div class="parameters-title">
+        <strong>计算参数</strong>
+        <span>成本与价格</span>
       </div>
       <div class="assumption-grid">
         <div class="field">
-          <label for="batchQty">生产数量</label>
+          <label for="batchQty">批次数量</label>
           <input id="batchQty" type="number" min="1" step="1">
         </div>
         <div class="field">
@@ -1295,7 +1289,7 @@
           </select>
         </div>
         <div class="field">
-          <label for="targetProjectProfitMargin">目标首发项目利润率 %</label>
+          <label for="targetProjectProfitMargin">目标利润率 %</label>
           <input id="targetProjectProfitMargin" type="number" min="0" max="60" step="1">
         </div>
         <div class="field">
@@ -1303,7 +1297,7 @@
           <input id="salesFeeRate" type="number" min="0" max="30" step="0.5">
         </div>
         <div class="field">
-          <label for="fixedLaunchCost">首发固定投入</label>
+          <label for="fixedLaunchCost">一次性固定成本</label>
           <input id="fixedLaunchCost" type="number" min="0" step="1">
         </div>
       </div>
@@ -1898,139 +1892,46 @@
     function renderSummary() {
       if (!store.products.length) {
         el.summary.innerHTML = `
-          <div class="locked-summary">
-            <div class="decision-metric"><span class="decision-label">产品状态</span><strong>未解锁</strong></div>
-            <div class="decision-metric"><span class="decision-label">会话状态</span><strong>空</strong></div>
-            <div class="decision-metric"><span class="decision-label">数据状态</span><strong>加密</strong></div>
+          <div class="cost-overview locked-summary">
+            <div class="overview-metric primary"><span class="overview-label">产品状态</span><strong class="overview-value">未解锁</strong></div>
+            <div class="overview-metric"><span class="overview-label">会话状态</span><strong class="overview-value">空</strong></div>
+            <div class="overview-metric"><span class="overview-label">数据状态</span><strong class="overview-value">加密</strong></div>
           </div>
         `;
         return;
       }
       const totals = calculateTotals();
-      const targetProjectProfitMargin = totals.targetFirstLaunchProjectProfitMarginRate * 100;
-      const channelRate = totals.salesChannelDeductionRate * 100;
-      const retainedRate = totals.retainedCostCoverageRate * 100;
-      const supplierAlert = totals.missingSupplier > 0 ? `
-        <div class="summary-alert">
-          <strong>有 ${totals.missingSupplier} 个成本项目尚未选择供应商。</strong>
-          未选择的供应商报价不会计入履约成本；请确认候选报价后再将结果用于定价。
-        </div>
-      ` : "";
+      const supplierStatus = totals.missingSupplier > 0
+        ? `${totals.missingSupplier} 项待选`
+        : "全部已选";
 
       el.summary.innerHTML = `
-        <article class="summary-card decision-card">
-          <span class="eyebrow">Pricing decision</span>
-          <div class="decision-label">建议公开单价 / 台</div>
-          <div class="decision-price">${escapeHtml(money(totals.recommendedRetailUnitPrice))}</div>
-          <div class="decision-subtitle">由单位首发完全成本反推，并按公开价格尾数向上取整。</div>
-          <div class="decision-grid">
-            <div class="decision-metric">
-              <span class="decision-label">最低平均售价</span>
-              <strong>${escapeHtml(money(totals.minimumAverageSellingPrice))}</strong>
-            </div>
-            <div class="decision-metric">
-              <span class="decision-label">单位首发完全成本</span>
-              <strong>${escapeHtml(money(totals.unitFirstLaunchFullCost))}</strong>
-            </div>
-            <div class="decision-metric">
-              <span class="decision-label">目标首发项目利润率</span>
-              <strong>${escapeHtml(percent(targetProjectProfitMargin))}</strong>
-            </div>
-            <div class="decision-metric">
-              <span class="decision-label">建议价对应项目利润率</span>
-              <strong>${escapeHtml(percent(totals.firstLaunchProjectProfitMargin))}</strong>
-            </div>
+        <div class="cost-overview">
+          <div class="overview-metric primary" title="单位履约成本加一次性固定成本的单台分摊">
+            <span class="overview-label">单位完全成本</span>
+            <strong class="overview-value">${escapeHtml(money(totals.unitFirstLaunchFullCost))}</strong>
           </div>
-        </article>
-
-        <article class="summary-card cost-formation">
-          <div class="summary-head">
-            <div>
-              <span class="eyebrow">Unit cost formation</span>
-              <h2>单位首发完全成本如何形成</h2>
-            </div>
-            <p>${totals.batchQuantity} 台首发批次</p>
+          <div class="overview-metric" title="交付产品前发生的单台成本">
+            <span class="overview-label">交付前 / 台</span>
+            <strong class="overview-value">${escapeHtml(money(totals.unitPreDeliveryFulfillmentCost))}</strong>
           </div>
-          <div class="cost-equation">
-            <div class="equation-node cost">
-              <span class="equation-label">单位履约成本</span>
-              <strong>${escapeHtml(money(totals.unitFulfillmentCost))}</strong>
-              <small>交付前履约 ${escapeHtml(money(totals.unitPreDeliveryFulfillmentCost))} + 售后支持预计 ${escapeHtml(money(totals.unitPostSaleSupportExpectedCost))}</small>
-            </div>
-            <div class="equation-operator" aria-hidden="true">+</div>
-            <div class="equation-node fixed">
-              <span class="equation-label">单位固定投入分摊</span>
-              <strong>${escapeHtml(money(totals.unitAllocatedFixedLaunchInvestment))}</strong>
-              <small>${escapeHtml(money(totals.fixedLaunchInvestment))} ÷ ${totals.batchQuantity} 台</small>
-            </div>
-            <div class="equation-operator" aria-hidden="true">=</div>
-            <div class="equation-node full">
-              <span class="equation-label">单位首发完全成本</span>
-              <strong>${escapeHtml(money(totals.unitFirstLaunchFullCost))}</strong>
-              <small>覆盖履约成本与首发固定投入</small>
-            </div>
+          <div class="overview-metric" title="单台售后支持预计成本">
+            <span class="overview-label">售后支持 / 台</span>
+            <strong class="overview-value">${escapeHtml(money(totals.unitPostSaleSupportExpectedCost))}</strong>
           </div>
-          <div class="formula-line">
-            <strong>${escapeHtml(money(totals.unitFirstLaunchFullCost))}</strong>
-            ÷ ${escapeHtml(percent(retainedRate))} 成本覆盖比例
-            （100% - ${escapeHtml(percent(targetProjectProfitMargin))} 目标项目利润率 - ${escapeHtml(percent(channelRate))} 渠道扣减率）
-            = <strong>${escapeHtml(money(totals.minimumAverageSellingPrice))}</strong> 最低平均售价
+          <div class="overview-metric" title="一次性固定成本除以批次数量">
+            <span class="overview-label">固定成本分摊 / 台</span>
+            <strong class="overview-value">${escapeHtml(money(totals.unitAllocatedFixedLaunchInvestment))}</strong>
           </div>
-        </article>
-
-        <article class="summary-card profit-bridge">
-          <div class="summary-head">
-            <div>
-              <span class="eyebrow">Batch profit bridge</span>
-              <h2>首发批次利润桥</h2>
-            </div>
-            <p>管理口径，不含公司期间费用、税项及法定调整。</p>
+          <div class="overview-metric" title="当前批次的履约成本与一次性固定成本合计">
+            <span class="overview-label">批次总成本 · ${totals.batchQuantity} 台</span>
+            <strong class="overview-value">${escapeHtml(money(totals.firstLaunchProjectFullCost))}</strong>
           </div>
-          <div class="bridge-track">
-            <div class="bridge-node">
-              <span class="bridge-label">众筹产品总收入</span>
-              <strong>${escapeHtml(money(totals.grossPledgeRevenue))}</strong>
-              <small>${escapeHtml(money(totals.recommendedRetailUnitPrice))} × ${totals.batchQuantity} 台</small>
-            </div>
-            <div class="bridge-operator" aria-hidden="true">−</div>
-            <div class="bridge-node cost">
-              <span class="bridge-label">批次履约成本</span>
-              <strong>${escapeHtml(money(totals.batchFulfillmentCost))}</strong>
-              <small>单位履约成本 × 批次数量</small>
-            </div>
-            <div class="bridge-operator" aria-hidden="true">=</div>
-            <div class="bridge-node profit">
-              <span class="bridge-label">管理口径产品毛利</span>
-              <strong>${escapeHtml(money(totals.managementProductGrossProfit))}</strong>
-              <small>产品收入 - 批次履约成本</small>
-            </div>
-            <div class="bridge-operator" aria-hidden="true">−</div>
-            <div class="bridge-node deduction">
-              <span class="bridge-label">销售渠道扣减</span>
-              <strong>${escapeHtml(money(totals.salesChannelDeductions))}</strong>
-              <small>${escapeHtml(percent(channelRate))} × 产品收入</small>
-            </div>
-            <div class="bridge-operator" aria-hidden="true">=</div>
-            <div class="bridge-node">
-              <span class="bridge-label">产品贡献利润</span>
-              <strong>${escapeHtml(money(totals.productContributionProfit))}</strong>
-              <small>产品毛利 - 销售渠道扣减</small>
-            </div>
-            <div class="bridge-operator" aria-hidden="true">−</div>
-            <div class="bridge-node fixed">
-              <span class="bridge-label">首发固定投入</span>
-              <strong>${escapeHtml(money(totals.fixedLaunchInvestment))}</strong>
-              <small>认证、工程验证及首发准备</small>
-            </div>
-            <div class="bridge-operator" aria-hidden="true">=</div>
-            <div class="bridge-node profit">
-              <span class="bridge-label">管理口径首发项目利润</span>
-              <strong>${escapeHtml(money(totals.firstLaunchProjectProfit))}</strong>
-              <small>${escapeHtml(percent(totals.firstLaunchProjectProfitMargin))} / 产品总收入</small>
-            </div>
+          <div class="overview-metric ${totals.missingSupplier > 0 ? "warning" : ""}">
+            <span class="overview-label">成本项 / 供应商</span>
+            <strong class="overview-value">${totals.itemCount} 项 · ${escapeHtml(supplierStatus)}</strong>
           </div>
-        </article>
-        ${supplierAlert}
+        </div>
       `;
     }
 
