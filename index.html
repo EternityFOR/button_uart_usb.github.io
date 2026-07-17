@@ -253,7 +253,7 @@
 
     .cost-overview {
       display: grid;
-      grid-template-columns: repeat(3, minmax(225px, 1fr)) minmax(170px, .72fr);
+      grid-template-columns: repeat(4, minmax(230px, 1fr));
       min-width: 0;
       overflow: hidden;
       border: 1px solid var(--line);
@@ -282,6 +282,14 @@
 
     .overview-metric.warning {
       background: var(--amber-soft);
+    }
+
+    .overview-metric.price-formula {
+      background: var(--good-soft);
+    }
+
+    .overview-metric.price-formula .overview-value {
+      color: var(--good);
     }
 
     .overview-label {
@@ -463,6 +471,14 @@
       border-left-color: #b7791f;
     }
 
+    .category.scope-channel-deduction {
+      border-left-color: #0f766e;
+    }
+
+    .category.scope-budget-context {
+      border-left-color: #64748b;
+    }
+
     .category-header,
     .group-header,
     .item-header {
@@ -499,6 +515,22 @@
 
     .category.scope-fixed-launch:not(.collapsed) > .category-header {
       background: #ffedbd;
+    }
+
+    .category.scope-channel-deduction > .category-header {
+      background: #edf9f6;
+    }
+
+    .category.scope-channel-deduction:not(.collapsed) > .category-header {
+      background: #d7f1e9;
+    }
+
+    .category.scope-budget-context > .category-header {
+      background: #f3f4f6;
+    }
+
+    .category.scope-budget-context:not(.collapsed) > .category-header {
+      background: #e5e7eb;
     }
 
     .category.collapsed > .category-header {
@@ -724,6 +756,18 @@
       color: #8a5700;
     }
 
+    .item.channel-reference .heading-main::before {
+      content: "扣减项";
+      border-color: #7bc8ba;
+      color: #0f766e;
+    }
+
+    .item.budget-reference .heading-main::before {
+      content: "预算项";
+      border-color: #aeb8c5;
+      color: #526171;
+    }
+
     .heading-main strong {
       grid-column: 2;
       overflow: hidden;
@@ -801,6 +845,43 @@
       border-top: 1px solid #eadfbd;
       border-radius: 0 0 5px 5px;
       background: #fffdf8;
+    }
+
+    .item.reference-item .item-body {
+      border-top-color: var(--line);
+      background: #f8fafc;
+    }
+
+    .reference-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+    }
+
+    .reference-field {
+      min-width: 0;
+      display: grid;
+      gap: 3px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .reference-field span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .reference-field strong {
+      overflow-wrap: anywhere;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .reference-field.wide {
+      grid-column: 1 / -1;
     }
 
     .detail-grid {
@@ -1216,7 +1297,7 @@
       }
 
       .category-toggle {
-        grid-template-columns: 28px minmax(0, 1fr) auto;
+        grid-template-columns: 28px minmax(0, 1fr);
       }
 
       .category-toggle .pill {
@@ -1224,16 +1305,51 @@
       }
 
       .group-toggle {
-        grid-template-columns: 28px minmax(0, 1fr) auto;
+        grid-template-columns: 28px minmax(0, 1fr);
       }
 
       .item-toggle {
-        grid-template-columns: 28px minmax(0, 1fr) auto;
+        grid-template-columns: 28px minmax(0, 1fr);
       }
 
       .item-toggle .summary-qty,
       .item-toggle .summary-supplier {
         display: none;
+      }
+
+      .heading-main {
+        align-items: start;
+      }
+
+      .heading-main strong,
+      .heading-main small,
+      .item-toggle .summary-cost strong {
+        overflow: visible;
+        text-overflow: clip;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        line-height: 1.35;
+      }
+
+      .category-toggle > .money,
+      .group-toggle > .money,
+      .item-toggle .summary-cost {
+        grid-column: 2;
+        justify-self: start;
+        min-width: 0;
+        margin-top: 2px;
+        text-align: left;
+      }
+
+      .item-toggle .summary-cost {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+      }
+
+      .item-toggle .summary-cost .item-row-label {
+        flex: 0 0 auto;
+        margin: 0;
       }
 
       .detail-grid {
@@ -1462,7 +1578,9 @@
     const COST_SCOPE_PRE_DELIVERY_CASH = "pre-delivery-cash";
     const COST_SCOPE_POST_SALE_SUPPORT = "post-sale-support-reserve";
     const COST_SCOPE_FIXED_LAUNCH = "fixed-launch-investment";
-    const FINANCIAL_TERMINOLOGY_VERSION = "2026-07-17-full-cost";
+    const COST_SCOPE_CHANNEL_DEDUCTION = "sales-channel-deduction";
+    const COST_SCOPE_BUDGET_CONTEXT = "budget-context";
+    const FINANCIAL_TERMINOLOGY_VERSION = "2026-07-18-budget-context";
 
     const blankProductTemplate = {
       projectName: "未命名成本表",
@@ -1743,10 +1861,10 @@
       document.getElementById("duplicateProductBtn").addEventListener("click", duplicateProduct);
       document.getElementById("deleteProductBtn").addEventListener("click", deleteProduct);
       bindRootField(el.projectName, "projectName", () => el.projectName.value);
-      bindRootField(el.batchQty, "batchQty", () => number(el.batchQty.value));
+      bindRootField(el.batchQty, "batchQty", () => number(el.batchQty.value), true);
       el.currency.addEventListener("change", () => updateRoot("currency", el.currency.value, true));
       bindRootField(el.targetProjectProfitMargin, "targetFirstLaunchProjectProfitMargin", () => number(el.targetProjectProfitMargin.value));
-      bindRootField(el.salesFeeRate, "salesFeeRate", () => number(el.salesFeeRate.value));
+      bindRootField(el.salesFeeRate, "salesFeeRate", () => number(el.salesFeeRate.value), true);
       bindRootField(el.fixedLaunchCost, "fixedLaunchCost", () => number(el.fixedLaunchCost.value));
       el.globalNote.addEventListener("input", () => updateRoot("note", el.globalNote.value, false, false));
       el.globalNote.addEventListener("blur", () => updateRoot("note", el.globalNote.value, true, false));
@@ -1774,9 +1892,9 @@
       el.applyJsonBtn.addEventListener("click", applyJson);
     }
 
-    function bindRootField(node, key, readValue) {
-      node.addEventListener("input", () => updateRoot(key, readValue(), false));
-      node.addEventListener("blur", () => updateRoot(key, readValue(), true));
+    function bindRootField(node, key, readValue, rebuildDetailsOnInput = false) {
+      node.addEventListener("input", () => updateRoot(key, readValue(), rebuildDetailsOnInput));
+      node.addEventListener("blur", () => updateRoot(key, readValue(), !rebuildDetailsOnInput));
     }
 
     function updateRoot(key, value, rebuildDetails = false, refreshOverview = true) {
@@ -2031,31 +2149,28 @@
         return;
       }
       const totals = calculateTotals();
-      const supplierStatus = totals.missingSupplier > 0
-        ? `${totals.missingSupplier} 项待选`
-        : "全部已选";
 
       el.summary.innerHTML = `
         <div class="cost-overview">
           <div class="overview-metric" title="单位履约成本 = 单位交付前履约成本 + 单位售后支持预计成本">
             <span class="overview-label">单位履约成本</span>
             <strong class="overview-value">${escapeHtml(money(totals.unitFulfillmentCost))}</strong>
-            <span class="overview-detail">交付前 ${escapeHtml(formatFixed(totals.unitPreDeliveryFulfillmentCost))} + 售后 ${escapeHtml(formatFixed(totals.unitPostSaleSupportExpectedCost))}</span>
+            <span class="overview-detail">${escapeHtml(formatFixed(totals.unitPreDeliveryFulfillmentCost))} + ${escapeHtml(formatFixed(totals.unitPostSaleSupportExpectedCost))} = ${escapeHtml(formatFixed(totals.unitFulfillmentCost))}</span>
           </div>
           <div class="overview-metric primary" title="单位首发完全成本 = 单位履约成本 + 首发固定投入 ÷ 批次数量">
             <span class="overview-label">单位首发完全成本</span>
             <strong class="overview-value">${escapeHtml(money(totals.unitFirstLaunchFullCost))}</strong>
-            <span class="overview-detail">履约 ${escapeHtml(formatFixed(totals.unitFulfillmentCost))} + 固定分摊 ${escapeHtml(formatFixed(totals.unitAllocatedFixedLaunchInvestment))}</span>
+            <span class="overview-detail">${escapeHtml(formatFixed(totals.unitFulfillmentCost))} + ${escapeHtml(formatFixed(totals.fixedLaunchInvestment, 2))} ÷ ${totals.batchQuantity} = ${escapeHtml(formatFixed(totals.unitFirstLaunchFullCost))}</span>
           </div>
           <div class="overview-metric" title="首发项目完全成本 = 单位履约成本 × 批次数量 + 首发固定投入">
             <span class="overview-label">首发项目完全成本 · ${totals.batchQuantity} 台</span>
             <strong class="overview-value">${escapeHtml(money(totals.firstLaunchProjectFullCost))}</strong>
-            <span class="overview-detail">${escapeHtml(formatFixed(totals.unitFulfillmentCost))} × ${totals.batchQuantity} + ${escapeHtml(formatFixed(totals.fixedLaunchInvestment, 2))}</span>
+            <span class="overview-detail">${escapeHtml(formatFixed(totals.unitFulfillmentCost))} × ${totals.batchQuantity} + ${escapeHtml(formatFixed(totals.fixedLaunchInvestment, 2))} = ${escapeHtml(formatFixed(totals.firstLaunchProjectFullCost, 2))}</span>
           </div>
-          <div class="overview-metric ${totals.missingSupplier > 0 ? "warning" : ""}">
-            <span class="overview-label">成本项 / 供应商</span>
-            <strong class="overview-value">${totals.itemCount} 项 · ${escapeHtml(supplierStatus)}</strong>
-            <span class="overview-detail">固定投入 ${escapeHtml(money(totals.fixedLaunchInvestment))}</span>
+          <div class="overview-metric price-formula" title="最低平均售价 = 单位首发完全成本 ÷（1 - 销售渠道扣减率 - 目标首发项目利润率）">
+            <span class="overview-label">最低平均售价</span>
+            <strong class="overview-value">${escapeHtml(money(totals.minimumAverageSellingPrice))}</strong>
+            <span class="overview-detail">${escapeHtml(formatFixed(totals.unitFirstLaunchFullCost))} ÷ (1 - ${escapeHtml(formatFixed(totals.salesChannelDeductionRate * 100, 2))}% - ${escapeHtml(formatFixed(totals.targetFirstLaunchProjectProfitMarginRate * 100, 2))}%) = ${escapeHtml(formatFixed(totals.minimumAverageSellingPrice))}</span>
           </div>
         </div>
       `;
@@ -2070,7 +2185,7 @@
       el.categoryNav.innerHTML = data.categories.map((cat) => `
         <a class="nav-item" href="#cat-${cat.id}" data-nav-category="${cat.id}">
           <span class="nav-name">${escapeHtml(cat.name)}</span>
-          <span class="nav-price">${money(totals.byId[cat.id] || 0)}</span>
+          <span class="nav-price">${escapeHtml(categorySummaryLabel(cat, totals))}</span>
         </a>
       `).join("");
       el.categoryNav.querySelectorAll("[data-nav-category]").forEach((node) => {
@@ -2084,8 +2199,16 @@
     function openCategoryFromNav(categoryId) {
       const cat = findCategory(categoryId);
       if (!cat) return;
-      cat.collapsed = false;
-      cat.groups.forEach((grp) => grp.collapsed = false);
+      filterText = "";
+      el.filterText.value = "";
+      data.categories.forEach((candidate) => {
+        const active = candidate.id === categoryId;
+        candidate.collapsed = !active;
+        candidate.groups.forEach((grp) => {
+          grp.collapsed = !active;
+          grp.items.forEach((it) => it.collapsed = !active);
+        });
+      });
       save();
       renderCategories();
       requestAnimationFrame(() => {
@@ -2111,7 +2234,12 @@
         ? "scope-fixed-launch"
         : scope === COST_SCOPE_POST_SALE_SUPPORT
           ? "scope-post-sale"
-          : "scope-pre-delivery";
+          : scope === COST_SCOPE_CHANNEL_DEDUCTION
+            ? "scope-channel-deduction"
+            : scope === COST_SCOPE_BUDGET_CONTEXT
+              ? "scope-budget-context"
+              : "scope-pre-delivery";
+      const readOnlyScope = isReferenceScope(scope);
       return `
         <article class="category ${scopeClass} ${cat.collapsed ? "collapsed" : ""}" id="cat-${cat.id}">
           <div class="category-header">
@@ -2120,12 +2248,12 @@
               <span class="heading-main"><strong>${escapeHtml(cat.name)}</strong><small>${escapeHtml(cat.note || "")}</small></span>
               <span class="pill category-scope">${escapeHtml(costScopeLabel(cat.costScope))}</span>
               <span class="pill category-count">${cat.groups.length}组 / ${itemCount(cat)}项</span>
-              <span class="money">${escapeHtml(money(categoryDisplayAmount(cat)))}</span>
+              <span class="money">${escapeHtml(categoryDisplayLabel(cat))}</span>
             </button>
-            <span class="category-tools">
+            ${readOnlyScope ? "" : `<span class="category-tools">
               <button type="button" data-action="add-group" data-category-id="${cat.id}">加子类</button>
               <button type="button" data-action="edit-category" data-category-id="${cat.id}">编辑</button>
-            </span>
+            </span>`}
           </div>
           <div class="category-body">${groups.join("")}</div>
         </article>
@@ -2141,12 +2269,12 @@
             <button type="button" class="header-toggle group-toggle" data-toggle-group="${cat.id}:${grp.id}" aria-expanded="${grp.collapsed ? "false" : "true"}">
               <span class="twisty" aria-hidden="true"></span>
               <span class="heading-main"><strong>${escapeHtml(grp.name)}</strong><small>${escapeHtml(grp.note || "")}</small></span>
-              <span class="money">${escapeHtml(money(groupDisplayAmount(cat, grp)))}</span>
+              <span class="money">${escapeHtml(groupDisplayLabel(cat, grp))}</span>
             </button>
-            <span class="group-tools">
+            ${isReferenceScope(cat.costScope) ? "" : `<span class="group-tools">
               <button type="button" data-action="add-item" data-category-id="${cat.id}" data-group-id="${grp.id}">加物料</button>
               <button type="button" data-action="edit-group" data-category-id="${cat.id}" data-group-id="${grp.id}">编辑</button>
-            </span>
+            </span>`}
           </div>
           <div class="group-body">${items.join("")}</div>
         </section>
@@ -2155,6 +2283,7 @@
 
     function renderItem(cat, grp, it) {
       if (filterText && !matchesItem(it)) return "";
+      if (isReferenceScope(cat.costScope)) return renderReferenceItem(cat, grp, it);
       const chosen = getChosenSupplier(it);
       const identity = [it.designator, it.footprint].filter(Boolean).join(" · ") || it.note || "未填写规格";
       const fixedLaunchItem = isFixedLaunchScope(cat.costScope);
@@ -2194,6 +2323,48 @@
           </div>
         </section>
       `;
+    }
+
+    function renderReferenceItem(cat, grp, it) {
+      const reference = it.budgetReference || {};
+      const channelItem = isChannelDeductionScope(cat.costScope);
+      const modelBoundary = reference.referenceKind === "model-boundary";
+      const ratePercent = channelItem ? channelItemRatePercent(cat, it) : 0;
+      const referenceId = modelBoundary ? "权威财务模型" : reference.budgetId || it.designator;
+      const identity = [referenceId, budgetStatusLabel(reference.status)].filter(Boolean).join(" · ");
+      const relationship = channelItem ? "已进入售价公式" : budgetRelationshipLabel(reference.relationship);
+      const displayName = budgetItemLabel(reference.budgetId, it.name);
+      const estimateLabel = modelBoundary ? "当前金额状态" : "Office 原币区间";
+      return `
+        <section class="item reference-item ${channelItem ? "channel-reference" : "budget-reference"} ${it.collapsed ? "collapsed" : ""}">
+          <div class="item-header">
+            <button type="button" class="header-toggle item-toggle" data-toggle-item="${cat.id}:${grp.id}:${it.id}" aria-expanded="${it.collapsed ? "false" : "true"}">
+              <span class="twisty" aria-hidden="true"></span>
+              <span class="heading-main"><strong>${escapeHtml(displayName)}</strong><small>${escapeHtml(identity)}</small></span>
+              ${headerCell(channelItem ? "产品收入" : budgetStatusLabel(reference.status), channelItem ? "计费基数" : modelBoundary ? "边界状态" : "预算状态", "summary-qty")}
+              ${headerCell(budgetEstimateLabel(reference), estimateLabel, "summary-supplier")}
+              ${headerCell(channelItem ? `${formatFixed(ratePercent, 2)}%` : relationship, channelItem ? "当前扣减率" : "当前模型", "summary-cost")}
+            </button>
+          </div>
+          <div class="item-body">
+            <div class="reference-grid">
+              ${referenceField(modelBoundary ? "参考来源" : "预算编号", referenceId || "-")}
+              ${referenceField(modelBoundary ? "边界状态" : "预算状态", budgetStatusLabel(reference.status))}
+              ${referenceField(modelBoundary ? "当前金额状态" : "原币估算", budgetEstimateLabel(reference))}
+              ${referenceField("当前模型关系", relationship)}
+              ${referenceField("触发阶段", reference.dueStage || "未填写")}
+              ${referenceField("分类", reference.category || "未填写")}
+              ${referenceField(modelBoundary ? "权威模型条目" : "Office 原始条目", it.name || "未填写", true)}
+              ${referenceField("依据", reference.sourceOrBasis || "未填写", true)}
+              ${referenceField("备注", reference.notes || it.note || "未填写", true)}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function referenceField(label, value, wide = false) {
+      return `<div class="reference-field ${wide ? "wide" : ""}"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
     }
 
     function renderSupplier(cat, grp, it, sp) {
@@ -2724,19 +2895,20 @@
         ["管理口径首发项目利润", totals.firstLaunchProjectProfit],
         ["管理口径首发项目利润率%", totals.firstLaunchProjectProfitMargin],
         [],
-        ["成本范围代码", "成本范围", "大类", "子类", "物料", "位号", "规格", "单台用量", "单位", "损耗率%", "选中供应商", "料号/SKU", "型号", "计价方式", "单价/批次价", "运费/台", "加工费/台", "单位成本计入额", "批次成本计入额", "备注"]
+        ["成本范围代码", "成本范围", "大类", "子类", "物料", "位号", "规格", "单台用量", "单位", "损耗率%", "选中供应商", "料号/SKU", "型号", "计价方式", "单价/批次价", "运费/台", "加工费/台", "单位成本计入额", "批次成本计入额", "备注", "参考编号", "参考状态", "原币估算或金额状态", "当前模型关系"]
       ];
       data.categories.forEach((cat) => {
         cat.groups.forEach((grp) => {
           grp.items.forEach((it) => {
             const sp = getChosenSupplier(it) || {};
             const unit = itemUnitCost(it);
+            const reference = it.budgetReference || {};
             rows.push([
               normalizeCostScope(cat.costScope),
               costScopeLabel(cat.costScope),
               cat.name,
               grp.name,
-              it.name,
+              reference.budgetId ? budgetItemLabel(reference.budgetId, it.name) : it.name,
               it.designator,
               it.footprint,
               it.qty,
@@ -2751,7 +2923,15 @@
               it.processCost || 0,
               unit,
               unit * number(data.batchQty || 1),
-              it.note || ""
+              it.note || "",
+              reference.budgetId || (reference.referenceKind === "model-boundary" ? it.id : ""),
+              reference.status ? budgetStatusLabel(reference.status) : "",
+              reference.budgetId ? budgetEstimateLabel(reference) : "",
+              isChannelDeductionScope(cat.costScope)
+                ? `${formatFixed(channelItemRatePercent(cat, it), 2)}% 产品收入扣减`
+                : reference.relationship
+                  ? budgetRelationshipLabel(reference.relationship)
+                  : ""
             ]);
           });
         });
@@ -2812,12 +2992,13 @@
           // Fixed-launch categories are batch-level details and do not enter unit fulfillment cost.
         } else if (scope === COST_SCOPE_POST_SALE_SUPPORT) {
           totals.unitPostSaleSupportExpectedCost += total;
-        } else {
+        } else if (scope === COST_SCOPE_PRE_DELIVERY_CASH) {
           totals.unitPreDeliveryFulfillmentCost += total;
         }
         totals.byName[cat.name] = categoryDisplayAmount(cat, sourceData);
         totals.byId[cat.id] = categoryDisplayAmount(cat, sourceData);
         cat.groups.forEach((grp) => grp.items.forEach((it) => {
+          if (isReferenceScope(scope)) return;
           totals.itemCount += 1;
           if (!getChosenSupplier(it)) totals.missingSupplier += 1;
         }));
@@ -2896,6 +3077,18 @@
       return normalizeCostScope(value) === COST_SCOPE_FIXED_LAUNCH;
     }
 
+    function isChannelDeductionScope(value) {
+      return normalizeCostScope(value) === COST_SCOPE_CHANNEL_DEDUCTION;
+    }
+
+    function isBudgetContextScope(value) {
+      return normalizeCostScope(value) === COST_SCOPE_BUDGET_CONTEXT;
+    }
+
+    function isReferenceScope(value) {
+      return isChannelDeductionScope(value) || isBudgetContextScope(value);
+    }
+
     function hasFixedLaunchDetails(sourceData = data) {
       return sourceData.categories.some((cat) => isFixedLaunchScope(cat.costScope));
     }
@@ -2913,6 +3106,7 @@
     }
 
     function categoryDisplayAmount(cat, sourceData = data) {
+      if (isReferenceScope(cat.costScope)) return 0;
       const amount = categoryTotal(cat, sourceData);
       return isFixedLaunchScope(cat.costScope)
         ? amount * Math.max(1, number(sourceData.batchQty || 1))
@@ -2920,10 +3114,32 @@
     }
 
     function groupDisplayAmount(cat, grp, sourceData = data) {
+      if (isReferenceScope(cat.costScope)) return 0;
       const amount = groupTotal(grp, sourceData);
       return isFixedLaunchScope(cat.costScope)
         ? amount * Math.max(1, number(sourceData.batchQty || 1))
         : amount;
+    }
+
+    function categoryDisplayLabel(cat, sourceData = data) {
+      if (isChannelDeductionScope(cat.costScope)) return `${formatFixed(channelDeductionRatePercent(sourceData), 2)}%`;
+      if (isBudgetContextScope(cat.costScope)) return `${itemCount(cat)} 项 · 当前不计入`;
+      return money(categoryDisplayAmount(cat, sourceData));
+    }
+
+    function categorySummaryLabel(cat, totals, sourceData = data) {
+      if (isChannelDeductionScope(cat.costScope)) return `${formatFixed(totals.salesChannelDeductionRate * 100, 2)}%`;
+      if (isBudgetContextScope(cat.costScope)) return `${itemCount(cat)} 项 · 不计入`;
+      return money(totals.byId[cat.id] || 0);
+    }
+
+    function groupDisplayLabel(cat, grp, sourceData = data) {
+      if (isChannelDeductionScope(cat.costScope)) {
+        const total = grp.items.reduce((sum, item) => sum + channelItemRatePercent(cat, item, sourceData), 0);
+        return `${formatFixed(total, 2)}%`;
+      }
+      if (isBudgetContextScope(cat.costScope)) return `${grp.items.length} 项`;
+      return money(groupDisplayAmount(cat, grp, sourceData));
     }
 
     function itemDisplayAmount(cat, it, sourceData = data) {
@@ -2941,7 +3157,110 @@
     }
 
     function categoryTotal(cat, sourceData = data) {
+      if (isReferenceScope(cat.costScope)) return 0;
       return cat.groups.reduce((sum, grp) => sum + groupTotal(grp, sourceData), 0);
+    }
+
+    function channelDeductionRatePercent(sourceData = data) {
+      return Math.min(30, Math.max(0, number(sourceData.salesFeeRate)));
+    }
+
+    function channelItemRatePercent(cat, item, sourceData = data) {
+      const total = channelDeductionRatePercent(sourceData);
+      if (item.rateMode === "fixed") return Math.min(total, Math.max(0, number(item.ratePercent)));
+      const fixedTotal = cat.groups
+        .flatMap((group) => group.items)
+        .filter((candidate) => candidate.rateMode === "fixed")
+        .reduce((sum, candidate) => sum + Math.max(0, number(candidate.ratePercent)), 0);
+      return Math.max(0, total - Math.min(total, fixedTotal));
+    }
+
+    function budgetItemLabel(budgetId, fallback) {
+      return ({
+        "BUD-0001": "Inno Setup 商业使用许可（无需购买）",
+        "BUD-0003": "Azure Trusted Signing Basic 资格路线",
+        "BUD-0004": "美国首次申请回退路线官方费",
+        "BUD-0005": "非香港专利延续与海外扩展预留",
+        "BUD-0006": "香港专利审查阶段律师撰写与复核预留",
+        "BUD-0007": "香港短期专利官方申请费（条件路线）",
+        "BUD-0008": "香港标准专利（O）OP1 申请及公告费（已支付）",
+        "BUD-0009": "中国内地专利后续路线预留",
+        "BUD-0013": "香港注册地址与公司秘书服务",
+        "BUD-0014": "DeDge 文字商标香港官方申请费（已支付）",
+        "BUD-0015": "主 .com 域名注册与首次续费基线",
+        "BUD-0017": "验证样机与寄送（已由 V5 工程批次覆盖）",
+        "BUD-0018": "台架测试夹具、适配器、备用目标板与耗材",
+        "BUD-0019": "首批 300 台交付前生产现金需求（已进入当前模型）",
+        "BUD-0020": "三人核心团队月度薪酬基线",
+        "BUD-0021": "香港本地私人公司注册费",
+        "BUD-0022": "首份商业登记证费用及征费",
+        "BUD-0023": "周年申报表 NAR1 按时提交费",
+        "BUD-0024": "商业登记续期费用及征费",
+        "BUD-0025": "记账、年度账目与审计服务基线",
+        "BUD-0027": "Kickstarter 页面素材与短演示制作",
+        "BUD-0028": "众筹回报包装、插页、标签与首波打包材料",
+        "BUD-0029": "众筹出库运费转付",
+        "BUD-0030": "Kickstarter 平台费扣减",
+        "BUD-0031": "支付处理费扣减",
+        "BUD-0032": "补发、退款、丢件与支持预计成本（已进入当前模型）",
+        "BUD-0033": "启动演示、媒体与评测用 Proof 设备",
+        "BUD-0034": "香港标准专利（O）OP2 实质审查费",
+        "BUD-0035": "FlashLink 文字商标香港官方申请费",
+        "BUD-0036": "DeDge 核心设备图形商标香港官方申请费",
+        "BUD-0037": "dedge.dev 首年域名注册费",
+        "BUD-0038": "香港邮政个人 e-Cert（IPD 电子提交）",
+        "BUD-0039": "第三方 OEM 虚拟串口驱动 SDK 备选报价",
+        "BUD-0040": "欧盟 / 英国网络安全与产品安全扩展预留",
+        "BUD-0041": "NRTL 列名增量预留",
+        "BUD-0042": "美国完整有意辐射体重认证与 TCB 条件路线"
+      })[String(budgetId || "")] || String(fallback || budgetId || "未命名预算项");
+    }
+
+    function budgetEstimateLabel(reference = {}) {
+      if (reference.referenceKind === "model-boundary") return "尚未计量";
+      const currency = String(reference.currency || "").trim() || "原币";
+      const low = number(reference.lowEstimate);
+      const high = number(reference.highEstimate);
+      const format = (value) => new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 2 }).format(value);
+      if (low === high) return `${currency} ${format(low)}`;
+      return `${currency} ${format(low)} - ${format(high)}`;
+    }
+
+    function budgetStatusLabel(status) {
+      return ({
+        closed: "已关闭 / 无费用",
+        covered: "已由其他预算覆盖",
+        "included-in-manufacturing": "已计入生产成本",
+        "included-in-unit-cost": "已计入单位成本",
+        "shipping-pass-through": "客户运费转付",
+        "revenue-deduction": "从产品收入扣减",
+        paid: "已支付",
+        "receipt-needed": "待补付款凭证",
+        deferred: "递延",
+        "eligibility-check": "资格核查",
+        "quote-needed": "待报价",
+        unquoted: "尚未报价",
+        "statutory-adjustment": "法定调整后确认",
+        open: "当前预算",
+        active: "当前有效",
+        planned: "已计划"
+      })[String(status || "")] || String(status || "未标注");
+    }
+
+    function budgetRelationshipLabel(relationship) {
+      return ({
+        "covered-or-included": "不重复计入",
+        "included-in-current-model": "已进入当前成本公式",
+        "shipping-pass-through": "客户另付",
+        "conditional-or-deferred": "条件触发后再计入",
+        "paid-or-shared": "不计入本次新增成本",
+        "paid-or-personal-prerequisite": "已支付或个人前置，不回加",
+        "later-ip-route": "后续法定或策略路线",
+        "alternative-ip-route": "替代路线，触发后再计入",
+        "company-level-not-allocated": "主体层费用，当前不分摊",
+        "unpriced-model-boundary": "金额确认后回模型重算",
+        "statutory-model-boundary": "法定调整，不计入项目管理利润"
+      })[String(relationship || "")] || "当前不计入";
     }
 
     function groupTotal(grp, sourceData = data) {
@@ -2990,7 +3309,19 @@
 
     function matchesItem(it) {
       const supplierText = it.suppliers.map((sp) => [sp.name, sp.sku, sp.model, sp.note].join(" ")).join(" ");
-      return [it.name, it.designator, it.footprint, it.note, supplierText].some((value) => String(value || "").toLowerCase().includes(filterText));
+      const reference = it.budgetReference || {};
+      const referenceText = [
+        reference.budgetId,
+        reference.projectId,
+        reference.category,
+        reference.status,
+        reference.currency,
+        reference.dueStage,
+        reference.sourceOrBasis,
+        reference.notes
+      ].join(" ");
+      return [it.name, it.designator, it.footprint, it.note, supplierText, referenceText]
+        .some((value) => String(value || "").toLowerCase().includes(filterText));
     }
 
     function findCategory(catId) {
@@ -3019,6 +3350,8 @@
         value === COST_SCOPE_PRE_DELIVERY_CASH
         || value === COST_SCOPE_POST_SALE_SUPPORT
         || value === COST_SCOPE_FIXED_LAUNCH
+        || value === COST_SCOPE_CHANNEL_DEDUCTION
+        || value === COST_SCOPE_BUDGET_CONTEXT
       ) return value;
       return fallback;
     }
@@ -3027,6 +3360,8 @@
       const scope = normalizeCostScope(value);
       if (scope === COST_SCOPE_FIXED_LAUNCH) return "首发固定投入";
       if (scope === COST_SCOPE_POST_SALE_SUPPORT) return "售后支持预计成本";
+      if (scope === COST_SCOPE_CHANNEL_DEDUCTION) return "按产品收入扣减";
+      if (scope === COST_SCOPE_BUDGET_CONTEXT) return "预算边界 / 当前不计入";
       return "交付前履约成本";
     }
 
