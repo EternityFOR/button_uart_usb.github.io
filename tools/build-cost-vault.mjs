@@ -76,7 +76,17 @@ function normalizeProduct(product) {
 
 function normalizeProductData(data, sourceFile, requireExplicitCostScope) {
   assertObject(data, sourceFile, "data");
-  data.targetNetMargin = data.targetNetMargin ?? data.targetMargin ?? 30;
+  const compatibilityAliases = data.compatibilityAliases && typeof data.compatibilityAliases === "object" && !Array.isArray(data.compatibilityAliases)
+    ? data.compatibilityAliases
+    : {};
+  const legacyTargetMargin = compatibilityAliases.targetNetMargin ?? data.targetNetMargin ?? data.targetMargin;
+  data.targetFirstLaunchProjectProfitMargin = data.targetFirstLaunchProjectProfitMargin ?? legacyTargetMargin ?? 30;
+  const remainingCompatibilityAliases = { ...compatibilityAliases };
+  delete remainingCompatibilityAliases.targetNetMargin;
+  if (Object.keys(remainingCompatibilityAliases).length) data.compatibilityAliases = remainingCompatibilityAliases;
+  else delete data.compatibilityAliases;
+  delete data.targetNetMargin;
+  delete data.targetMargin;
   data.salesFeeRate = data.salesFeeRate ?? 0;
   data.fixedLaunchCost = data.fixedLaunchCost ?? 0;
   if (!Array.isArray(data.categories)) return;
@@ -107,11 +117,16 @@ function normalizeProductData(data, sourceFile, requireExplicitCostScope) {
 function validateProductData(data, sourceFile) {
   assertObject(data, sourceFile, "data");
   assertPositiveInteger(data.batchQty, sourceFile, "data.batchQty");
-  assertPercentageAtMost(data.targetNetMargin, 60, sourceFile, "data.targetNetMargin");
+  assertPercentageAtMost(
+    data.targetFirstLaunchProjectProfitMargin,
+    60,
+    sourceFile,
+    "data.targetFirstLaunchProjectProfitMargin"
+  );
   assertPercentageAtMost(data.salesFeeRate, 30, sourceFile, "data.salesFeeRate");
   assertNonNegativeNumber(data.fixedLaunchCost, sourceFile, "data.fixedLaunchCost");
-  if (Number(data.targetNetMargin) + Number(data.salesFeeRate) >= 100) {
-    fail(sourceFile, "data.targetNetMargin + data.salesFeeRate must be below 100%.");
+  if (Number(data.targetFirstLaunchProjectProfitMargin) + Number(data.salesFeeRate) >= 100) {
+    fail(sourceFile, "data.targetFirstLaunchProjectProfitMargin + data.salesFeeRate must be below 100%.");
   }
   if (!Array.isArray(data.categories) || !data.categories.length) {
     fail(sourceFile, "data.categories must be a non-empty array.");
@@ -185,7 +200,12 @@ async function validateCanonicalRecord(record, data, sourceFile) {
   assertPositiveNumber(canonical.batchQuantity, canonicalPath, "batchQuantity");
   assertNonNegativeNumber(canonical.fixedLaunchInvestment, canonicalPath, "fixedLaunchInvestment");
   assertRate(canonical.salesChannelDeductionRate, canonicalPath, "salesChannelDeductionRate");
-  assertRate(canonical.targetFirstLaunchProjectNetMarginRate, canonicalPath, "targetFirstLaunchProjectNetMarginRate");
+  const canonicalTargetProjectProfitMarginRate = Number(
+    canonical.targetFirstLaunchProjectProfitMarginRate
+      ?? canonical.compatibilityAliases?.targetFirstLaunchProjectNetMarginRate
+      ?? canonical.targetFirstLaunchProjectNetMarginRate
+  );
+  assertRate(canonicalTargetProjectProfitMarginRate, canonicalPath, "targetFirstLaunchProjectProfitMarginRate");
   assertNonNegativeNumber(canonical.recommendedPublicUnitPrice, canonicalPath, "recommendedPublicUnitPrice");
   if (!Array.isArray(canonical.costComponents) || !canonical.costComponents.length) {
     fail(canonicalPath, "costComponents must be a non-empty array.");
@@ -196,7 +216,13 @@ async function validateCanonicalRecord(record, data, sourceFile) {
     fail(sourceFile, `currency differs from the canonical finance model: ${data.currency} != ${canonical.currency}.`);
   }
   assertClose(Number(data.salesFeeRate) / 100, canonical.salesChannelDeductionRate, tolerance, sourceFile, "sales channel deduction rate");
-  assertClose(Number(data.targetNetMargin) / 100, canonical.targetFirstLaunchProjectNetMarginRate, tolerance, sourceFile, "target first-launch project net margin rate");
+  assertClose(
+    Number(data.targetFirstLaunchProjectProfitMargin) / 100,
+    canonicalTargetProjectProfitMarginRate,
+    tolerance,
+    sourceFile,
+    "target first-launch project profit margin rate"
+  );
   assertClose(data.fixedLaunchCost, canonical.fixedLaunchInvestment, tolerance, sourceFile, "fixed launch investment");
 
   const financials = calculateFinancials(data);
@@ -231,12 +257,33 @@ async function validateCanonicalRecord(record, data, sourceFile) {
     sourceFile,
     "recommended public unit price"
   );
+
+  if (canonical.benchmarkResults != null) {
+    assertObject(canonical.benchmarkResults, canonicalPath, "benchmarkResults");
+    const benchmarkFields = [
+      "unitPreDeliveryFulfillmentCost",
+      "expectedUnitAfterSalesSupportCost",
+      "unitFulfillmentCost",
+      "batchPreDeliveryFulfillmentCost",
+      "batchFulfillmentCost",
+      "unitAllocatedFixedLaunchInvestment",
+      "unitFirstLaunchFullCost",
+      "firstLaunchProjectFullCost",
+      "minimumAverageSellingPrice"
+    ];
+    for (const field of benchmarkFields) {
+      assertNonNegativeNumber(canonical.benchmarkResults[field], canonicalPath, `benchmarkResults.${field}`);
+      assertClose(financials[field], canonical.benchmarkResults[field], tolerance, sourceFile, field);
+    }
+  }
 }
 
 function calculateFinancials(data) {
   const batchQuantity = Number(data.batchQty);
   const categoryUnitCosts = new Map();
-  let unitProductEconomicCost = 0;
+  let unitPreDeliveryFulfillmentCost = 0;
+  let expectedUnitAfterSalesSupportCost = 0;
+  let unitFulfillmentCost = 0;
 
   for (const category of data.categories) {
     const categoryUnitCost = category.groups.reduce(
@@ -247,14 +294,32 @@ function calculateFinancials(data) {
       0
     );
     categoryUnitCosts.set(category.id, categoryUnitCost);
-    unitProductEconomicCost += categoryUnitCost;
+    if (category.costScope === "post-sale-support-reserve") {
+      expectedUnitAfterSalesSupportCost += categoryUnitCost;
+    } else {
+      unitPreDeliveryFulfillmentCost += categoryUnitCost;
+    }
+    unitFulfillmentCost += categoryUnitCost;
   }
 
-  const fullFirstLaunchEconomicCost = unitProductEconomicCost * batchQuantity + Number(data.fixedLaunchCost);
-  const costCoverageRate = 1 - Number(data.targetNetMargin) / 100 - Number(data.salesFeeRate) / 100;
-  const minimumAverageSellingPrice = fullFirstLaunchEconomicCost / costCoverageRate / batchQuantity;
+  const batchPreDeliveryFulfillmentCost = unitPreDeliveryFulfillmentCost * batchQuantity;
+  const batchFulfillmentCost = unitFulfillmentCost * batchQuantity;
+  const unitAllocatedFixedLaunchInvestment = Number(data.fixedLaunchCost) / batchQuantity;
+  const unitFirstLaunchFullCost = unitFulfillmentCost + unitAllocatedFixedLaunchInvestment;
+  const firstLaunchProjectFullCost = batchFulfillmentCost + Number(data.fixedLaunchCost);
+  const costCoverageRate = 1 - Number(data.targetFirstLaunchProjectProfitMargin) / 100 - Number(data.salesFeeRate) / 100;
+  const minimumAverageSellingPrice = firstLaunchProjectFullCost / costCoverageRate / batchQuantity;
   return {
     categoryUnitCosts,
+    unitPreDeliveryFulfillmentCost,
+    expectedUnitAfterSalesSupportCost,
+    unitFulfillmentCost,
+    batchPreDeliveryFulfillmentCost,
+    batchFulfillmentCost,
+    unitAllocatedFixedLaunchInvestment,
+    unitFirstLaunchFullCost,
+    firstLaunchProjectFullCost,
+    minimumAverageSellingPrice,
     recommendedRetailUnitPrice: roundRetailPrice(minimumAverageSellingPrice)
   };
 }

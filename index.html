@@ -17,7 +17,12 @@
       --accent-soft: #eaf1ff;
       --danger: #c93127;
       --good: #0f7a4f;
-      --shadow: 0 10px 26px rgba(23, 33, 43, .08);
+      --amber: #a86600;
+      --amber-soft: #fff6df;
+      --danger-soft: #fff0ed;
+      --good-soft: #eaf8f1;
+      --cost-soft: #eef5ff;
+      --shadow: 0 8px 20px rgba(23, 33, 43, .06);
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
     }
 
@@ -25,7 +30,6 @@
 
     body {
       margin: 0;
-      min-width: 1120px;
       background: var(--bg);
       color: var(--text);
     }
@@ -42,6 +46,7 @@
       background: #fff;
       color: var(--text);
       cursor: pointer;
+      white-space: nowrap;
     }
 
     button:hover {
@@ -62,6 +67,8 @@
 
     input, select, textarea {
       width: 100%;
+      min-width: 0;
+      max-width: 100%;
       min-height: 32px;
       border: 1px solid var(--line);
       border-radius: 6px;
@@ -84,29 +91,44 @@
     }
 
     .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 10;
       display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: start;
-      padding: 14px 22px;
+      gap: 14px;
+      padding: 18px 22px 14px;
       border-bottom: 1px solid var(--line);
-      background: rgba(245, 247, 250, .96);
-      backdrop-filter: blur(8px);
+      background: #fff;
     }
 
-    .title-row {
-      display: grid;
-      gap: 10px;
+    .header-primary {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
       min-width: 0;
+    }
+
+    .app-title {
+      min-width: 260px;
+    }
+
+    .eyebrow {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
     }
 
     h1 {
       margin: 0;
-      font-size: 20px;
-      white-space: nowrap;
+      font-size: 24px;
+      line-height: 1.2;
+    }
+
+    .app-title p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
     }
 
     .project-name {
@@ -115,15 +137,29 @@
 
     .product-switcher {
       display: grid;
-      grid-template-columns: 72px minmax(180px, 300px) minmax(240px, 380px) repeat(3, auto);
+      grid-template-columns: 72px minmax(180px, 320px) minmax(260px, 1fr) auto;
       gap: 8px;
       align-items: center;
-      max-width: 980px;
+      max-width: 1100px;
     }
 
     .product-switcher label {
       color: var(--muted);
       font-size: 12px;
+    }
+
+    .product-actions,
+    .command-group,
+    .editor-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+
+    .product-actions button,
+    .editor-actions button {
+      flex: 0 0 auto;
     }
 
     .actions {
@@ -134,12 +170,29 @@
       flex-wrap: wrap;
     }
 
+    .command-bar {
+      align-items: flex-start;
+      max-width: 930px;
+    }
+
+    .command-group {
+      padding-right: 8px;
+      border-right: 1px solid var(--line);
+    }
+
+    .command-group:last-of-type {
+      padding-right: 0;
+      border-right: 0;
+    }
+
     .unlock-strip {
       display: grid;
-      grid-template-columns: minmax(180px, 280px) minmax(180px, 280px) minmax(260px, 1fr) auto auto minmax(180px, 280px);
+      grid-template-columns: 120px minmax(180px, 280px) minmax(240px, 1fr) auto auto minmax(180px, 320px);
       gap: 10px;
       align-items: center;
-      padding: 12px 22px 0;
+      padding: 12px 22px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfe;
     }
 
     .unlock-title {
@@ -160,57 +213,260 @@
       font-weight: 400;
     }
 
-    .summary {
+    .planner-page {
       display: grid;
-      grid-template-columns: repeat(8, minmax(120px, 1fr));
-      gap: 10px;
-      padding: 14px 22px;
+      gap: 14px;
+      padding: 16px 22px 24px;
     }
 
-    .stat {
-      min-height: 78px;
-      padding: 10px 12px;
+    .summary {
+      display: grid;
+      grid-template-columns: minmax(280px, .68fr) minmax(560px, 1.32fr);
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .summary-card,
+    .assumptions-panel,
+    .editor-toolbar,
+    .sidebar,
+    .category {
       border: 1px solid var(--line);
       border-radius: 8px;
       background: var(--panel);
-      box-shadow: var(--shadow);
     }
 
-    .stat .label {
+    .summary-card {
+      padding: 16px;
+      min-width: 0;
+    }
+
+    .decision-card {
+      border-top: 4px solid var(--accent);
+    }
+
+    .decision-label,
+    .summary-title,
+    .bridge-label,
+    .equation-label {
       color: var(--muted);
       font-size: 12px;
+      font-weight: 700;
     }
 
-    .stat .value {
-      margin-top: 6px;
-      font-size: 22px;
-      font-weight: 700;
-      line-height: 1.15;
+    .decision-price {
+      margin-top: 8px;
+      font-size: 40px;
+      font-weight: 850;
+      line-height: 1;
       font-variant-numeric: tabular-nums;
     }
 
-    .stat .sub {
+    .decision-subtitle {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .decision-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .decision-metric {
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--soft);
+    }
+
+    .decision-metric strong {
+      display: block;
       margin-top: 4px;
+      font-size: 18px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cost-formation {
+      border-top: 4px solid #2d7fd3;
+    }
+
+    .summary-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .summary-head h2,
+    .section-heading h2 {
+      margin: 3px 0 0;
+      font-size: 18px;
+    }
+
+    .summary-head p,
+    .section-heading p {
+      margin: 0;
       color: var(--muted);
       font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .cost-equation {
+      display: grid;
+      grid-template-columns: minmax(130px, 1fr) 24px minmax(130px, 1fr) 24px minmax(150px, 1.08fr);
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .equation-node {
+      min-width: 0;
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--soft);
+    }
+
+    .equation-node.cost { background: var(--cost-soft); border-color: #c9ddf7; }
+    .equation-node.fixed { background: var(--amber-soft); border-color: #efd69d; }
+    .equation-node.full { background: #f3f0ff; border-color: #d8cdf5; }
+    .equation-node.price { background: var(--good-soft); border-color: #b8dec9; }
+
+    .equation-node strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 20px;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+
+    .equation-node small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .equation-operator {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .formula-line {
+      margin-top: 10px;
+      padding: 9px 11px;
+      border-left: 3px solid var(--accent);
+      background: #f7f9fc;
+      color: #354657;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .formula-line strong {
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .profit-bridge {
+      grid-column: 1 / -1;
+      border-top: 4px solid var(--good);
+    }
+
+    .bridge-track {
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .bridge-node {
+      flex: 1 0 150px;
+      min-width: 150px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--soft);
+    }
+
+    .bridge-node.deduction { background: var(--danger-soft); border-color: #f0c1ba; }
+    .bridge-node.cost { background: var(--cost-soft); border-color: #c9ddf7; }
+    .bridge-node.fixed { background: var(--amber-soft); border-color: #efd69d; }
+    .bridge-node.profit { background: var(--good-soft); border-color: #b8dec9; }
+
+    .bridge-node strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 17px;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+
+    .bridge-node small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .bridge-operator {
+      flex: 0 0 22px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .summary-alert {
+      grid-column: 1 / -1;
+      padding: 10px 12px;
+      border: 1px solid #efcf8d;
+      border-radius: 6px;
+      background: var(--amber-soft);
+      color: #714600;
+      font-size: 13px;
+    }
+
+    .summary-alert.good {
+      border-color: #a8d8c0;
+      background: var(--good-soft);
+      color: #0c603f;
+    }
+
+    .locked-summary {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .locked-summary .decision-metric {
+      min-height: 72px;
     }
 
     .workspace {
       display: grid;
-      grid-template-columns: 260px 1fr;
+      grid-template-columns: 260px minmax(0, 1fr);
       gap: 14px;
       align-items: start;
-      padding: 0 22px 24px;
+      min-width: 0;
     }
 
     .sidebar {
       position: sticky;
-      top: 150px;
+      top: 16px;
       padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--panel);
-      box-shadow: var(--shadow);
     }
 
     .sidebar h2 {
@@ -251,19 +507,53 @@
 
     .main {
       display: grid;
+      grid-template-columns: minmax(0, 1fr);
       gap: 12px;
+      min-width: 0;
     }
 
-    .toolbar {
+    #categories,
+    .category-body,
+    .group-body,
+    .item-body {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .assumptions-panel {
+      padding: 14px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 12px;
+    }
+
+    .section-heading p {
+      max-width: 620px;
+      text-align: right;
+    }
+
+    .assumption-grid {
       display: grid;
-      grid-template-columns: 150px 130px 130px 180px 1fr auto;
+      grid-template-columns: minmax(120px, .8fr) minmax(130px, .8fr) minmax(170px, 1fr) minmax(170px, 1fr) minmax(220px, 1.4fr);
+      gap: 10px;
+      align-items: end;
+    }
+
+    .editor-toolbar {
+      display: grid;
+      grid-template-columns: minmax(220px, .8fr) minmax(360px, 1.6fr) auto;
       gap: 10px;
       align-items: end;
       padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--panel);
-      box-shadow: var(--shadow);
+    }
+
+    .editor-actions {
+      justify-content: flex-end;
     }
 
     .field label {
@@ -273,35 +563,39 @@
       font-size: 12px;
     }
 
+    .field {
+      min-width: 0;
+    }
+
     .category {
+      min-width: 0;
+      max-width: 100%;
       overflow: hidden;
       border: 1px solid var(--line);
+      border-left: 4px solid #2d7fd3;
       border-radius: 8px;
       background: var(--panel);
       box-shadow: var(--shadow);
       position: relative;
     }
 
-    .category:not(.collapsed) {
-      border-left: 4px solid var(--accent);
+    .category.scope-post-sale {
+      border-left-color: #8a5fc7;
     }
 
     .category-header,
     .group-header,
     .item-header {
       width: 100%;
+      min-width: 0;
       min-height: 44px;
-      border: 0;
-      border-radius: 0;
       display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 10px;
       align-items: center;
-      text-align: left;
-      cursor: pointer;
     }
 
     .category-header {
-      grid-template-columns: 28px minmax(180px, 1fr) auto auto auto auto;
       padding: 10px 12px;
       background: #edf3fa;
       border-bottom: 1px solid var(--line);
@@ -311,8 +605,15 @@
       background: #dfeeff;
     }
 
+    .category.scope-post-sale > .category-header {
+      background: #f3effb;
+    }
+
+    .category.scope-post-sale:not(.collapsed) > .category-header {
+      background: #e9e0f8;
+    }
+
     .group-header {
-      grid-template-columns: 28px 1fr auto auto;
       padding: 9px 12px;
       background: #f7f9fb;
       border-top: 1px solid var(--line);
@@ -325,7 +626,6 @@
     }
 
     .item-header {
-      grid-template-columns: 28px minmax(220px, 1.3fr) repeat(8, minmax(80px, .65fr)) 90px;
       padding: 8px 12px;
       background: #fff;
       border-top: 1px solid #edf1f5;
@@ -334,6 +634,43 @@
     .item:not(.collapsed) > .item-header {
       background: #fff7e5;
       box-shadow: inset 4px 0 0 #d99400;
+    }
+
+    .header-toggle {
+      width: 100%;
+      min-width: 0;
+      min-height: 30px;
+      display: grid;
+      gap: 10px;
+      align-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: inherit;
+      text-align: left;
+    }
+
+    .header-toggle:hover {
+      border-color: transparent;
+      color: inherit;
+    }
+
+    .header-toggle:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .category-toggle {
+      grid-template-columns: 28px minmax(180px, 1fr) auto auto auto;
+    }
+
+    .group-toggle {
+      grid-template-columns: 28px minmax(180px, 1fr) auto;
+    }
+
+    .item-toggle {
+      grid-template-columns: 28px minmax(220px, 1.4fr) minmax(90px, .48fr) minmax(120px, .62fr) minmax(120px, .62fr);
     }
 
     .twisty {
@@ -422,6 +759,7 @@
     .group-tools,
     .item-tools {
       display: flex;
+      flex-wrap: nowrap;
       gap: 6px;
       align-items: center;
       justify-content: flex-end;
@@ -454,13 +792,15 @@
 
     .detail-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
       gap: 10px;
       margin-bottom: 12px;
     }
 
     .suppliers {
-      overflow: hidden;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: #fff;
@@ -469,10 +809,11 @@
     .supplier-head,
     .supplier-row {
       display: grid;
-      grid-template-columns: 42px 1fr 1fr 100px 110px 100px 90px 90px 90px 90px;
+      grid-template-columns: 42px minmax(130px, 1fr) minmax(150px, 1.15fr) minmax(110px, .8fr) 110px 110px 96px 80px 104px 72px;
       gap: 8px;
       align-items: center;
       padding: 8px;
+      min-width: 1060px;
     }
 
     .supplier-head {
@@ -627,32 +968,296 @@
       font-size: 12px;
       white-space: nowrap;
     }
+
+    @media (max-width: 1280px) {
+      .assumption-grid {
+        grid-template-columns: repeat(3, minmax(150px, 1fr));
+      }
+
+      .editor-toolbar {
+        grid-template-columns: minmax(180px, .75fr) minmax(260px, 1.25fr) auto;
+      }
+
+      .workspace {
+        grid-template-columns: 220px minmax(0, 1fr);
+      }
+
+      .item-toggle {
+        grid-template-columns: 28px minmax(190px, 1.3fr) minmax(80px, .45fr) minmax(105px, .55fr) minmax(110px, .58fr);
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .header-primary {
+        display: grid;
+      }
+
+      .command-bar {
+        justify-content: flex-start;
+        max-width: none;
+      }
+
+      .product-switcher {
+        grid-template-columns: 72px minmax(0, 1fr);
+        max-width: none;
+      }
+
+      .product-switcher .project-name,
+      .product-switcher .product-actions {
+        grid-column: 2;
+      }
+
+      .unlock-strip {
+        grid-template-columns: 110px minmax(180px, 1fr) auto auto;
+      }
+
+      .unlock-strip #productAccessCode,
+      .unlock-status {
+        grid-column: 2 / -1;
+      }
+
+      .summary {
+        grid-template-columns: 1fr;
+      }
+
+      .profit-bridge,
+      .summary-alert {
+        grid-column: auto;
+      }
+
+      .workspace {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .sidebar {
+        position: static;
+      }
+
+      .nav-list {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 3px;
+      }
+
+      .nav-item {
+        flex: 0 0 min(240px, 72vw);
+      }
+
+      .assumption-grid {
+        grid-template-columns: repeat(3, minmax(140px, 1fr));
+      }
+
+      .editor-toolbar {
+        grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+      }
+
+      .editor-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .topbar,
+      .planner-page {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .app-title {
+        min-width: 0;
+      }
+
+      h1 {
+        font-size: 21px;
+      }
+
+      .command-bar,
+      .command-group {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .command-group {
+        flex-wrap: wrap;
+        padding-right: 0;
+        padding-bottom: 7px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .product-switcher {
+        grid-template-columns: 1fr;
+      }
+
+      .product-switcher .project-name,
+      .product-switcher .product-actions {
+        grid-column: auto;
+      }
+
+      .product-actions,
+      .editor-actions {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+      }
+
+      .product-actions button,
+      .editor-actions button {
+        min-width: 0;
+        padding-left: 6px;
+        padding-right: 6px;
+      }
+
+      .unlock-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .unlock-title,
+      .unlock-strip select,
+      .unlock-strip #productAccessCode,
+      .unlock-status {
+        grid-column: 1 / -1;
+      }
+
+      .section-heading {
+        display: grid;
+        gap: 6px;
+      }
+
+      .section-heading p {
+        max-width: none;
+        text-align: left;
+      }
+
+      .assumption-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .assumption-grid .field:last-child {
+        grid-column: 1 / -1;
+      }
+
+      .editor-toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .editor-actions {
+        grid-column: auto;
+      }
+
+      .decision-grid,
+      .locked-summary {
+        grid-template-columns: 1fr;
+      }
+
+      .cost-equation {
+        grid-template-columns: 1fr;
+      }
+
+      .equation-operator {
+        min-height: 20px;
+      }
+
+      .category-header,
+      .group-header,
+      .item-header {
+        grid-template-columns: 1fr;
+        gap: 7px;
+      }
+
+      .category-tools,
+      .group-tools,
+      .item-tools {
+        justify-content: flex-start;
+      }
+
+      .category-toggle {
+        grid-template-columns: 28px minmax(0, 1fr) auto;
+      }
+
+      .category-toggle .pill {
+        display: none;
+      }
+
+      .group-toggle {
+        grid-template-columns: 28px minmax(0, 1fr) auto;
+      }
+
+      .item-toggle {
+        grid-template-columns: 28px minmax(0, 1fr) auto;
+      }
+
+      .item-toggle .summary-qty,
+      .item-toggle .summary-supplier {
+        display: none;
+      }
+
+      .detail-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .modal {
+        padding: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .assumption-grid,
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .assumption-grid .field:last-child {
+        grid-column: auto;
+      }
+
+      .decision-price {
+        font-size: 34px;
+      }
+
+      .product-actions button,
+      .editor-actions button {
+        font-size: 12px;
+      }
+    }
   </style>
 </head>
 <body>
   <header class="topbar">
-    <div class="title-row">
-      <h1>产品成本与首发项目利润规划器</h1>
-      <div class="product-switcher">
-        <label for="productSelect">当前产品</label>
-        <select id="productSelect"></select>
-        <input class="project-name" id="projectName" aria-label="产品名称" placeholder="产品名称">
+    <div class="header-primary">
+      <div class="app-title">
+        <span class="eyebrow">DeDge Cost Planner</span>
+        <h1>产品成本与首发项目利润规划器</h1>
+        <p>从履约成本、固定投入和渠道扣减反推可执行售价。</p>
+      </div>
+      <div class="actions command-bar">
+        <div class="command-group" aria-label="数据操作">
+          <button id="exportCsvBtn">导出 CSV</button>
+          <button id="exportJsonBtn">导出 JSON</button>
+          <button id="importJsonBtn">导入 JSON</button>
+        </div>
+        <div class="command-group" aria-label="云端操作">
+          <button class="primary" id="saveCloudBtn">保存云端</button>
+          <button id="loadCloudBtn">读取云端</button>
+          <button id="cloudHistoryBtn">云端历史</button>
+          <button id="cloudConfigBtn">云端设置</button>
+        </div>
+        <button class="danger" id="resetBtn">清空当前</button>
+      </div>
+    </div>
+    <div class="product-switcher">
+      <label for="productSelect">当前产品</label>
+      <select id="productSelect"></select>
+      <input class="project-name" id="projectName" aria-label="产品名称" placeholder="产品名称">
+      <div class="product-actions" aria-label="产品操作">
         <button id="addProductBtn">新增产品</button>
         <button id="duplicateProductBtn">复制产品</button>
         <button class="danger" id="deleteProductBtn">删除产品</button>
       </div>
-    </div>
-    <div class="actions">
-      <button id="expandAllBtn">全部展开</button>
-      <button id="collapseAllBtn">全部折叠</button>
-      <button id="exportCsvBtn">导出CSV</button>
-      <button id="exportJsonBtn">导出JSON</button>
-      <button id="importJsonBtn">导入JSON</button>
-      <button class="primary" id="saveCloudBtn">保存云端</button>
-      <button id="loadCloudBtn">读取云端</button>
-      <button id="cloudHistoryBtn">云端历史</button>
-      <button id="cloudConfigBtn">云端设置</button>
-      <button class="danger" id="resetBtn">清空当前</button>
     </div>
   </header>
 
@@ -665,18 +1270,18 @@
     <div class="unlock-status" id="unlockStatus">正在加载密文包...</div>
   </section>
 
-  <section class="summary" id="summary"></section>
+  <main class="planner-page">
+    <section class="summary" id="summary"></section>
 
-  <main class="workspace">
-    <aside class="sidebar">
-      <h2>分类导航</h2>
-      <div class="nav-list" id="categoryNav"></div>
-      <p class="footer-note">当前会话数据</p>
-      <p class="cloud-status" id="cloudStatus">云端未配置</p>
-    </aside>
-
-    <section class="main">
-      <div class="toolbar">
+    <section class="assumptions-panel">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Pricing assumptions</span>
+          <h2>定价假设</h2>
+        </div>
+        <p>这些参数决定单位首发完全成本如何转换为最低平均售价。</p>
+      </div>
+      <div class="assumption-grid">
         <div class="field">
           <label for="batchQty">生产数量</label>
           <input id="batchQty" type="number" min="1" step="1">
@@ -690,8 +1295,8 @@
           </select>
         </div>
         <div class="field">
-          <label for="targetNetMargin">目标首发项目净利率 %</label>
-          <input id="targetNetMargin" type="number" min="0" max="60" step="1">
+          <label for="targetProjectProfitMargin">目标首发项目利润率 %</label>
+          <input id="targetProjectProfitMargin" type="number" min="0" max="60" step="1">
         </div>
         <div class="field">
           <label for="salesFeeRate">销售渠道扣减率 %</label>
@@ -701,19 +1306,37 @@
           <label for="fixedLaunchCost">首发固定投入</label>
           <input id="fixedLaunchCost" type="number" min="0" step="1">
         </div>
-        <div class="field">
+      </div>
+    </section>
+
+    <div class="workspace">
+      <aside class="sidebar">
+        <h2>成本分类</h2>
+        <div class="nav-list" id="categoryNav"></div>
+        <p class="footer-note">当前会话数据</p>
+        <p class="cloud-status" id="cloudStatus">云端未配置</p>
+      </aside>
+
+      <section class="main">
+        <div class="editor-toolbar">
+          <div class="field search-field">
           <label for="filterText">搜索物料/供应商</label>
           <input id="filterText" placeholder="如 物料、供应商、规格">
-        </div>
-        <div class="field">
+          </div>
+          <div class="field note-field">
           <label for="globalNote">项目备注</label>
           <input id="globalNote" placeholder="版本、样机、量产、采购批次">
+          </div>
+          <div class="editor-actions" aria-label="成本明细操作">
+            <button id="expandAllBtn">全部展开</button>
+            <button id="collapseAllBtn">全部折叠</button>
+            <button class="primary" id="addCategoryBtn">新增大类</button>
+          </div>
         </div>
-        <button class="primary" id="addCategoryBtn">新增大类</button>
-      </div>
 
-      <div id="categories"></div>
-    </section>
+        <div id="categories"></div>
+      </section>
+    </div>
   </main>
 
   <div class="modal" id="jsonModal" role="dialog" aria-modal="true">
@@ -785,13 +1408,13 @@
     const VAULT_URL = "data/cost-vault.json";
     const COST_SCOPE_PRE_DELIVERY_CASH = "pre-delivery-cash";
     const COST_SCOPE_POST_SALE_SUPPORT = "post-sale-support-reserve";
-    const FINANCIAL_TERMINOLOGY_VERSION = "2026-07-17";
+    const FINANCIAL_TERMINOLOGY_VERSION = "2026-07-17-full-cost";
 
     const blankProductTemplate = {
       projectName: "未命名成本表",
       batchQty: 100,
       currency: "¥",
-      targetNetMargin: 30,
+      targetFirstLaunchProjectProfitMargin: 30,
       salesFeeRate: 0,
       fixedLaunchCost: 0,
       note: "",
@@ -813,7 +1436,7 @@
       projectName: document.getElementById("projectName"),
       batchQty: document.getElementById("batchQty"),
       currency: document.getElementById("currency"),
-      targetNetMargin: document.getElementById("targetNetMargin"),
+      targetProjectProfitMargin: document.getElementById("targetProjectProfitMargin"),
       salesFeeRate: document.getElementById("salesFeeRate"),
       fixedLaunchCost: document.getElementById("fixedLaunchCost"),
       globalNote: document.getElementById("globalNote"),
@@ -863,7 +1486,7 @@
         lossRate: 0,
         processCost: 0,
         note,
-        chosenSupplierId: suppliers[0]?.id || "",
+        chosenSupplierId: "",
         collapsed: true,
         suppliers
       };
@@ -925,7 +1548,17 @@
       const next = { ...clone(blankProductTemplate), ...value };
       next.id ||= uid();
       next.categories = Array.isArray(value?.categories) ? value.categories : [];
-      next.targetNetMargin = value?.targetNetMargin ?? value?.targetMargin ?? 30;
+      next.targetFirstLaunchProjectProfitMargin = value?.targetFirstLaunchProjectProfitMargin
+        ?? value?.compatibilityAliases?.targetNetMargin
+        ?? value?.targetNetMargin
+        ?? value?.targetMargin
+        ?? 30;
+      const compatibilityAliases = { ...(value?.compatibilityAliases || {}) };
+      delete compatibilityAliases.targetNetMargin;
+      if (Object.keys(compatibilityAliases).length) next.compatibilityAliases = compatibilityAliases;
+      else delete next.compatibilityAliases;
+      delete next.targetNetMargin;
+      delete next.targetMargin;
       next.salesFeeRate = value?.salesFeeRate ?? 0;
       next.fixedLaunchCost = value?.fixedLaunchCost ?? 0;
       delete next.financialSummary;
@@ -937,7 +1570,7 @@
       });
       walkItems(next, (it) => {
         it.suppliers ||= [];
-        it.chosenSupplierId ||= it.suppliers[0]?.id || "";
+        if (!it.suppliers.some((sp) => sp.id === it.chosenSupplierId)) it.chosenSupplierId = "";
         it.lossRate = number(it.lossRate);
         it.processCost = number(it.processCost);
         it.qty = number(it.qty);
@@ -997,13 +1630,14 @@
       document.getElementById("addProductBtn").addEventListener("click", addProduct);
       document.getElementById("duplicateProductBtn").addEventListener("click", duplicateProduct);
       document.getElementById("deleteProductBtn").addEventListener("click", deleteProduct);
-      el.projectName.addEventListener("input", () => updateRoot("projectName", el.projectName.value));
-      el.batchQty.addEventListener("input", () => updateRoot("batchQty", number(el.batchQty.value)));
-      el.currency.addEventListener("change", () => updateRoot("currency", el.currency.value));
-      el.targetNetMargin.addEventListener("input", () => updateRoot("targetNetMargin", number(el.targetNetMargin.value)));
-      el.salesFeeRate.addEventListener("input", () => updateRoot("salesFeeRate", number(el.salesFeeRate.value)));
-      el.fixedLaunchCost.addEventListener("input", () => updateRoot("fixedLaunchCost", number(el.fixedLaunchCost.value)));
-      el.globalNote.addEventListener("input", () => updateRoot("note", el.globalNote.value));
+      bindRootField(el.projectName, "projectName", () => el.projectName.value);
+      bindRootField(el.batchQty, "batchQty", () => number(el.batchQty.value));
+      el.currency.addEventListener("change", () => updateRoot("currency", el.currency.value, true));
+      bindRootField(el.targetProjectProfitMargin, "targetFirstLaunchProjectProfitMargin", () => number(el.targetProjectProfitMargin.value));
+      bindRootField(el.salesFeeRate, "salesFeeRate", () => number(el.salesFeeRate.value));
+      bindRootField(el.fixedLaunchCost, "fixedLaunchCost", () => number(el.fixedLaunchCost.value));
+      el.globalNote.addEventListener("input", () => updateRoot("note", el.globalNote.value, false, false));
+      el.globalNote.addEventListener("blur", () => updateRoot("note", el.globalNote.value, true, false));
       el.filterText.addEventListener("input", () => {
         filterText = el.filterText.value.trim().toLowerCase();
         renderCategories();
@@ -1028,12 +1662,21 @@
       el.applyJsonBtn.addEventListener("click", applyJson);
     }
 
-    function updateRoot(key, value) {
+    function bindRootField(node, key, readValue) {
+      node.addEventListener("input", () => updateRoot(key, readValue(), false));
+      node.addEventListener("blur", () => updateRoot(key, readValue(), true));
+    }
+
+    function updateRoot(key, value, rebuildDetails = false, refreshOverview = true) {
       if (!store.products.length) return;
       data[key] = value;
       save();
-      if (key === "projectName") renderProductSelect();
-      renderCostViews();
+      if (rebuildDetails) {
+        if (key === "projectName") renderProductSelect();
+        renderCostViews();
+      } else if (refreshOverview) {
+        renderSummary();
+      }
     }
 
     async function loadVault() {
@@ -1199,7 +1842,7 @@
       el.projectName.value = data.projectName || "";
       el.batchQty.value = data.batchQty || 1;
       el.currency.value = data.currency || "¥";
-      el.targetNetMargin.value = data.targetNetMargin ?? 30;
+      el.targetProjectProfitMargin.value = data.targetFirstLaunchProjectProfitMargin ?? 30;
       el.salesFeeRate.value = data.salesFeeRate ?? 0;
       el.fixedLaunchCost.value = data.fixedLaunchCost ?? 0;
       el.globalNote.value = data.note || "";
@@ -1208,7 +1851,7 @@
         el.projectName,
         el.batchQty,
         el.currency,
-        el.targetNetMargin,
+        el.targetProjectProfitMargin,
         el.salesFeeRate,
         el.fixedLaunchCost,
         el.globalNote,
@@ -1254,36 +1897,141 @@
 
     function renderSummary() {
       if (!store.products.length) {
-        el.summary.innerHTML = [
-          stat("产品状态", "未解锁", "等待解锁"),
-          stat("会话状态", "空", "当前标签页"),
-          stat("数据状态", "加密", "待解锁")
-        ].join("");
+        el.summary.innerHTML = `
+          <div class="locked-summary">
+            <div class="decision-metric"><span class="decision-label">产品状态</span><strong>未解锁</strong></div>
+            <div class="decision-metric"><span class="decision-label">会话状态</span><strong>空</strong></div>
+            <div class="decision-metric"><span class="decision-label">数据状态</span><strong>加密</strong></div>
+          </div>
+        `;
         return;
       }
       const totals = calculateTotals();
-      el.summary.innerHTML = [
-        stat("单位生产交付前现金成本", money(totals.unitPreDeliveryCashCost), "生产、质检、包装和出货前返工"),
-        stat("单位售后支持预留", money(totals.unitPostSaleSupportReserve), "换新、补寄和支持者服务"),
-        stat("单位产品经济成本", money(totals.unitProductEconomicCost), `${totals.itemCount} 个成本项目`),
-        stat("批次制造现金需求", money(totals.batchManufacturingCashRequirement), `${totals.batchQuantity} 台生产交付前`),
-        stat("批次产品经济成本", money(totals.batchProductEconomicCost), "制造现金 + 批次售后预留"),
-        stat("首发固定投入", money(totals.fixedLaunchInvestment), "认证、签名、工程验证等"),
-        stat("首批完整经济成本", money(totals.fullFirstLaunchEconomicCost), "批次产品经济成本 + 固定投入"),
-        stat("最低平均售价/台", money(totals.minimumAverageSellingPrice), `${formatNum(totals.targetFirstLaunchProjectNetMarginRate * 100)}% 目标首发项目净利率`),
-        stat("建议公开单价/台", money(totals.recommendedRetailUnitPrice), "按公开价格尾数向上取整"),
-        stat("众筹产品总收入", money(totals.grossPledgeRevenue), `${money(totals.recommendedRetailUnitPrice)} × ${totals.batchQuantity}`),
-        stat("销售渠道扣减", money(totals.salesChannelDeductions), `${formatNum(totals.salesChannelDeductionRate * 100)}% / 批次`),
-        stat("销售净收入", money(totals.netSalesRevenue), "众筹产品总收入 - 销售渠道扣减"),
-        stat("产品贡献利润", money(totals.productContributionProfit), "销售净收入 - 批次产品经济成本"),
-        stat("首发项目净利润", money(totals.firstLaunchProjectNetProfit), "产品贡献利润 - 首发固定投入"),
-        stat("首发项目净利率", percent(totals.firstLaunchProjectNetMargin), "首发项目净利润 / 众筹产品总收入"),
-        stat("未选供应商", String(totals.missingSupplier), "需要补供应商")
-      ].join("");
-    }
+      const targetProjectProfitMargin = totals.targetFirstLaunchProjectProfitMarginRate * 100;
+      const channelRate = totals.salesChannelDeductionRate * 100;
+      const retainedRate = totals.retainedCostCoverageRate * 100;
+      const supplierAlert = totals.missingSupplier > 0 ? `
+        <div class="summary-alert">
+          <strong>有 ${totals.missingSupplier} 个成本项目尚未选择供应商。</strong>
+          未选择的供应商报价不会计入履约成本；请确认候选报价后再将结果用于定价。
+        </div>
+      ` : "";
 
-    function stat(label, value, sub) {
-      return `<div class="stat"><div class="label">${escapeHtml(label)}</div><div class="value">${escapeHtml(value)}</div><div class="sub">${escapeHtml(sub)}</div></div>`;
+      el.summary.innerHTML = `
+        <article class="summary-card decision-card">
+          <span class="eyebrow">Pricing decision</span>
+          <div class="decision-label">建议公开单价 / 台</div>
+          <div class="decision-price">${escapeHtml(money(totals.recommendedRetailUnitPrice))}</div>
+          <div class="decision-subtitle">由单位首发完全成本反推，并按公开价格尾数向上取整。</div>
+          <div class="decision-grid">
+            <div class="decision-metric">
+              <span class="decision-label">最低平均售价</span>
+              <strong>${escapeHtml(money(totals.minimumAverageSellingPrice))}</strong>
+            </div>
+            <div class="decision-metric">
+              <span class="decision-label">单位首发完全成本</span>
+              <strong>${escapeHtml(money(totals.unitFirstLaunchFullCost))}</strong>
+            </div>
+            <div class="decision-metric">
+              <span class="decision-label">目标首发项目利润率</span>
+              <strong>${escapeHtml(percent(targetProjectProfitMargin))}</strong>
+            </div>
+            <div class="decision-metric">
+              <span class="decision-label">建议价对应项目利润率</span>
+              <strong>${escapeHtml(percent(totals.firstLaunchProjectProfitMargin))}</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="summary-card cost-formation">
+          <div class="summary-head">
+            <div>
+              <span class="eyebrow">Unit cost formation</span>
+              <h2>单位首发完全成本如何形成</h2>
+            </div>
+            <p>${totals.batchQuantity} 台首发批次</p>
+          </div>
+          <div class="cost-equation">
+            <div class="equation-node cost">
+              <span class="equation-label">单位履约成本</span>
+              <strong>${escapeHtml(money(totals.unitFulfillmentCost))}</strong>
+              <small>交付前履约 ${escapeHtml(money(totals.unitPreDeliveryFulfillmentCost))} + 售后支持预计 ${escapeHtml(money(totals.unitPostSaleSupportExpectedCost))}</small>
+            </div>
+            <div class="equation-operator" aria-hidden="true">+</div>
+            <div class="equation-node fixed">
+              <span class="equation-label">单位固定投入分摊</span>
+              <strong>${escapeHtml(money(totals.unitAllocatedFixedLaunchInvestment))}</strong>
+              <small>${escapeHtml(money(totals.fixedLaunchInvestment))} ÷ ${totals.batchQuantity} 台</small>
+            </div>
+            <div class="equation-operator" aria-hidden="true">=</div>
+            <div class="equation-node full">
+              <span class="equation-label">单位首发完全成本</span>
+              <strong>${escapeHtml(money(totals.unitFirstLaunchFullCost))}</strong>
+              <small>覆盖履约成本与首发固定投入</small>
+            </div>
+          </div>
+          <div class="formula-line">
+            <strong>${escapeHtml(money(totals.unitFirstLaunchFullCost))}</strong>
+            ÷ ${escapeHtml(percent(retainedRate))} 成本覆盖比例
+            （100% - ${escapeHtml(percent(targetProjectProfitMargin))} 目标项目利润率 - ${escapeHtml(percent(channelRate))} 渠道扣减率）
+            = <strong>${escapeHtml(money(totals.minimumAverageSellingPrice))}</strong> 最低平均售价
+          </div>
+        </article>
+
+        <article class="summary-card profit-bridge">
+          <div class="summary-head">
+            <div>
+              <span class="eyebrow">Batch profit bridge</span>
+              <h2>首发批次利润桥</h2>
+            </div>
+            <p>管理口径，不含公司期间费用、税项及法定调整。</p>
+          </div>
+          <div class="bridge-track">
+            <div class="bridge-node">
+              <span class="bridge-label">众筹产品总收入</span>
+              <strong>${escapeHtml(money(totals.grossPledgeRevenue))}</strong>
+              <small>${escapeHtml(money(totals.recommendedRetailUnitPrice))} × ${totals.batchQuantity} 台</small>
+            </div>
+            <div class="bridge-operator" aria-hidden="true">−</div>
+            <div class="bridge-node cost">
+              <span class="bridge-label">批次履约成本</span>
+              <strong>${escapeHtml(money(totals.batchFulfillmentCost))}</strong>
+              <small>单位履约成本 × 批次数量</small>
+            </div>
+            <div class="bridge-operator" aria-hidden="true">=</div>
+            <div class="bridge-node profit">
+              <span class="bridge-label">管理口径产品毛利</span>
+              <strong>${escapeHtml(money(totals.managementProductGrossProfit))}</strong>
+              <small>产品收入 - 批次履约成本</small>
+            </div>
+            <div class="bridge-operator" aria-hidden="true">−</div>
+            <div class="bridge-node deduction">
+              <span class="bridge-label">销售渠道扣减</span>
+              <strong>${escapeHtml(money(totals.salesChannelDeductions))}</strong>
+              <small>${escapeHtml(percent(channelRate))} × 产品收入</small>
+            </div>
+            <div class="bridge-operator" aria-hidden="true">=</div>
+            <div class="bridge-node">
+              <span class="bridge-label">产品贡献利润</span>
+              <strong>${escapeHtml(money(totals.productContributionProfit))}</strong>
+              <small>产品毛利 - 销售渠道扣减</small>
+            </div>
+            <div class="bridge-operator" aria-hidden="true">−</div>
+            <div class="bridge-node fixed">
+              <span class="bridge-label">首发固定投入</span>
+              <strong>${escapeHtml(money(totals.fixedLaunchInvestment))}</strong>
+              <small>认证、工程验证及首发准备</small>
+            </div>
+            <div class="bridge-operator" aria-hidden="true">=</div>
+            <div class="bridge-node profit">
+              <span class="bridge-label">管理口径首发项目利润</span>
+              <strong>${escapeHtml(money(totals.firstLaunchProjectProfit))}</strong>
+              <small>${escapeHtml(percent(totals.firstLaunchProjectProfitMargin))} / 产品总收入</small>
+            </div>
+          </div>
+        </article>
+        ${supplierAlert}
+      `;
     }
 
     function renderNav() {
@@ -1313,19 +2061,24 @@
     function renderCategory(cat) {
       const groups = cat.groups.map((grp) => renderGroup(cat, grp)).filter(Boolean);
       if (filterText && !matchesCategory(cat) && !groups.length) return "";
+      const scopeClass = normalizeCostScope(cat.costScope) === COST_SCOPE_POST_SALE_SUPPORT
+        ? "scope-post-sale"
+        : "scope-pre-delivery";
       return `
-        <article class="category ${cat.collapsed ? "collapsed" : ""}" id="cat-${cat.id}">
-          <button class="category-header" data-toggle-category="${cat.id}">
-            <span class="twisty"></span>
-            <span class="heading-main"><strong>${escapeHtml(cat.name)}</strong><small>${escapeHtml(cat.note || "")}</small></span>
-            <span class="pill">${escapeHtml(costScopeLabel(cat.costScope))}</span>
-            <span class="pill">${cat.groups.length}组 / ${itemCount(cat)}项</span>
-            <span class="money">${money(categoryTotal(cat))}</span>
+        <article class="category ${scopeClass} ${cat.collapsed ? "collapsed" : ""}" id="cat-${cat.id}">
+          <div class="category-header">
+            <button type="button" class="header-toggle category-toggle" data-toggle-category="${cat.id}" aria-expanded="${cat.collapsed ? "false" : "true"}">
+              <span class="twisty" aria-hidden="true"></span>
+              <span class="heading-main"><strong>${escapeHtml(cat.name)}</strong><small>${escapeHtml(cat.note || "")}</small></span>
+              <span class="pill category-scope">${escapeHtml(costScopeLabel(cat.costScope))}</span>
+              <span class="pill category-count">${cat.groups.length}组 / ${itemCount(cat)}项</span>
+              <span class="money">${escapeHtml(money(categoryTotal(cat)))}</span>
+            </button>
             <span class="category-tools">
-              <button data-action="add-group" data-category-id="${cat.id}">加子类</button>
-              <button data-action="edit-category" data-category-id="${cat.id}">编辑</button>
+              <button type="button" data-action="add-group" data-category-id="${cat.id}">加子类</button>
+              <button type="button" data-action="edit-category" data-category-id="${cat.id}">编辑</button>
             </span>
-          </button>
+          </div>
           <div class="category-body">${groups.join("")}</div>
         </article>
       `;
@@ -1336,15 +2089,17 @@
       if (filterText && !matchesGroup(grp) && !items.length) return "";
       return `
         <section class="group ${grp.collapsed ? "collapsed" : ""}">
-          <button class="group-header" data-toggle-group="${cat.id}:${grp.id}">
-            <span class="twisty"></span>
-            <span class="heading-main"><strong>${escapeHtml(grp.name)}</strong><small>${escapeHtml(grp.note || "")}</small></span>
-            <span class="money">${money(groupTotal(grp))}</span>
+          <div class="group-header">
+            <button type="button" class="header-toggle group-toggle" data-toggle-group="${cat.id}:${grp.id}" aria-expanded="${grp.collapsed ? "false" : "true"}">
+              <span class="twisty" aria-hidden="true"></span>
+              <span class="heading-main"><strong>${escapeHtml(grp.name)}</strong><small>${escapeHtml(grp.note || "")}</small></span>
+              <span class="money">${escapeHtml(money(groupTotal(grp)))}</span>
+            </button>
             <span class="group-tools">
-              <button data-action="add-item" data-category-id="${cat.id}" data-group-id="${grp.id}">加物料</button>
-              <button data-action="edit-group" data-category-id="${cat.id}" data-group-id="${grp.id}">编辑</button>
+              <button type="button" data-action="add-item" data-category-id="${cat.id}" data-group-id="${grp.id}">加物料</button>
+              <button type="button" data-action="edit-group" data-category-id="${cat.id}" data-group-id="${grp.id}">编辑</button>
             </span>
-          </button>
+          </div>
           <div class="group-body">${items.join("")}</div>
         </section>
       `;
@@ -1353,21 +2108,19 @@
     function renderItem(cat, grp, it) {
       if (filterText && !matchesItem(it)) return "";
       const chosen = getChosenSupplier(it);
+      const identity = [it.designator, it.footprint].filter(Boolean).join(" · ") || it.note || "未填写规格";
       return `
         <section class="item ${it.collapsed ? "collapsed" : ""}">
-          <button class="item-header" data-toggle-item="${cat.id}:${grp.id}:${it.id}">
-            <span class="twisty"></span>
-            ${headerCell(it.name, "物料")}
-            ${headerCell(it.designator, "位号")}
-            ${headerCell(it.footprint, "规格")}
-            ${headerCell(formatNum(it.qty), "单台用量")}
-            ${headerCell(it.unit || "pcs", "单位")}
-            ${headerCell(percent(it.lossRate), "损耗")}
-            ${headerCell(chosen?.name || "未选", "供应商")}
-            ${headerCell(chosen?.sku || "-", "料号")}
-            ${headerCell(money(itemUnitCost(it)), "单位成本计入额")}
-            <span class="item-tools"><button data-action="edit-item" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}">编辑</button></span>
-          </button>
+          <div class="item-header">
+            <button type="button" class="header-toggle item-toggle" data-toggle-item="${cat.id}:${grp.id}:${it.id}" aria-expanded="${it.collapsed ? "false" : "true"}">
+              <span class="twisty" aria-hidden="true"></span>
+              <span class="heading-main"><strong>${escapeHtml(it.name)}</strong><small>${escapeHtml(identity)}</small></span>
+              ${headerCell(`${formatNum(it.qty)} ${it.unit || "pcs"}`, "单台用量", "summary-qty")}
+              ${headerCell(chosen?.name || "未选供应商", "供应商", "summary-supplier")}
+              ${headerCell(money(itemUnitCost(it)), "单位成本计入额", "summary-cost")}
+            </button>
+            <span class="item-tools"><button type="button" data-action="edit-item" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}">编辑</button></span>
+          </div>
           <div class="item-body">
             <div class="detail-grid">
               ${fieldHtml("名称", "name", it.name, cat.id, grp.id, it.id)}
@@ -1415,8 +2168,8 @@
       `;
     }
 
-    function headerCell(value, label) {
-      return `<span class="item-cell"><span class="item-row-label">${escapeHtml(label)}</span><strong>${escapeHtml(value ?? "")}</strong></span>`;
+    function headerCell(value, label, className = "") {
+      return `<span class="item-cell ${escapeAttr(className)}"><span class="item-row-label">${escapeHtml(label)}</span><strong>${escapeHtml(value ?? "")}</strong></span>`;
     }
 
     function fieldHtml(label, field, value, catId, grpId, itemId, type = "text") {
@@ -1454,10 +2207,13 @@
         });
       });
       document.querySelectorAll("[data-action]").forEach((node) => node.addEventListener("click", handleAction));
-      document.querySelectorAll("[data-item-field]").forEach((node) => node.addEventListener("input", handleItemField));
+      document.querySelectorAll("[data-item-field]").forEach((node) => {
+        node.addEventListener("input", (event) => handleItemField(event, false));
+        node.addEventListener("blur", (event) => handleItemField(event, true));
+      });
       document.querySelectorAll("[data-supplier-field]").forEach((node) => {
-        node.addEventListener("input", handleSupplierField);
-        node.addEventListener("change", handleSupplierField);
+        node.addEventListener("input", (event) => handleSupplierField(event, false));
+        node.addEventListener(node.tagName === "SELECT" ? "change" : "blur", (event) => handleSupplierField(event, true));
       });
     }
 
@@ -1481,20 +2237,22 @@
       if (action === "choose-supplier") chooseSupplier(d.categoryId, d.groupId, d.itemId, d.supplierId);
     }
 
-    function handleItemField(event) {
+    function handleItemField(event, rebuildDetails) {
       const d = event.currentTarget.dataset;
       const it = findItem(d.categoryId, d.groupId, d.itemId);
       it[d.itemField] = event.currentTarget.type === "number" ? number(event.currentTarget.value) : event.currentTarget.value;
       save();
-      renderCostViews();
+      if (rebuildDetails) renderCostViews();
+      else renderSummary();
     }
 
-    function handleSupplierField(event) {
+    function handleSupplierField(event, rebuildDetails) {
       const d = event.currentTarget.dataset;
       const sp = findSupplier(d.categoryId, d.groupId, d.itemId, d.supplierId);
       sp[d.supplierField] = event.currentTarget.type === "number" ? number(event.currentTarget.value) : event.currentTarget.value;
       save();
-      renderCostViews();
+      if (rebuildDetails) renderCostViews();
+      else renderSummary();
     }
 
     function addCategory() {
@@ -1572,7 +2330,6 @@
       const it = findItem(catId, grpId, itemId);
       const sp = supplier("新供应商", "", "", 0, 0, 1, "");
       it.suppliers.push(sp);
-      if (!it.chosenSupplierId) it.chosenSupplierId = sp.id;
       save();
       renderCostViews();
     }
@@ -1584,13 +2341,14 @@
         return;
       }
       it.suppliers = it.suppliers.filter((sp) => sp.id !== supplierId);
-      if (it.chosenSupplierId === supplierId) it.chosenSupplierId = it.suppliers[0]?.id || "";
+      if (it.chosenSupplierId === supplierId) it.chosenSupplierId = "";
       save();
       render();
     }
 
     function chooseSupplier(catId, grpId, itemId, supplierId) {
-      findItem(catId, grpId, itemId).chosenSupplierId = supplierId;
+      const it = findItem(catId, grpId, itemId);
+      it.chosenSupplierId = it.chosenSupplierId === supplierId ? "" : supplierId;
       save();
       render();
     }
@@ -1628,10 +2386,15 @@
       el.modalTitle.textContent = "导出JSON";
       const exportStore = clone(store);
       exportStore.financialTerminologyVersion = FINANCIAL_TERMINOLOGY_VERSION;
-      exportStore.products = store.products.map((product) => ({
-        ...clone(product),
-        financialSummary: buildFinancialSummary(calculateTotals(product), product)
-      }));
+      exportStore.products = store.products.map((product) => {
+        const exportedProduct = clone(product);
+        const targetProjectProfitMargin = number(product.targetFirstLaunchProjectProfitMargin);
+        exportedProduct.targetFirstLaunchProjectProfitMargin = targetProjectProfitMargin;
+        delete exportedProduct.targetNetMargin;
+        delete exportedProduct.targetMargin;
+        exportedProduct.financialSummary = buildFinancialSummary(calculateTotals(product), product);
+        return exportedProduct;
+      });
       el.jsonText.value = JSON.stringify(exportStore, null, 2);
       el.applyJsonBtn.style.display = "none";
       el.copyJsonBtn.style.display = "";
@@ -1892,23 +2655,25 @@
         ["项目", data.projectName || ""],
         ["币种", data.currency || ""],
         ["生产数量", totals.batchQuantity],
-        ["目标首发项目净利率%", totals.targetFirstLaunchProjectNetMarginRate * 100],
+        ["目标首发项目利润率%", totals.targetFirstLaunchProjectProfitMarginRate * 100],
         ["销售渠道扣减率%", totals.salesChannelDeductionRate * 100],
-        ["单位生产交付前现金成本", totals.unitPreDeliveryCashCost],
-        ["单位售后支持预留", totals.unitPostSaleSupportReserve],
-        ["单位产品经济成本", totals.unitProductEconomicCost],
-        ["批次制造现金需求", totals.batchManufacturingCashRequirement],
-        ["批次产品经济成本", totals.batchProductEconomicCost],
+        ["单位交付前履约成本", totals.unitPreDeliveryFulfillmentCost],
+        ["单位售后支持预计成本", totals.unitPostSaleSupportExpectedCost],
+        ["单位履约成本", totals.unitFulfillmentCost],
+        ["批次交付前履约成本", totals.batchPreDeliveryFulfillmentCost],
+        ["批次履约成本", totals.batchFulfillmentCost],
+        ["单位首发固定投入分摊", totals.unitAllocatedFixedLaunchInvestment],
         ["首发固定投入", totals.fixedLaunchInvestment],
-        ["首批完整经济成本", totals.fullFirstLaunchEconomicCost],
+        ["单位首发完全成本", totals.unitFirstLaunchFullCost],
+        ["首发项目完全成本", totals.firstLaunchProjectFullCost],
         ["最低平均售价/台", totals.minimumAverageSellingPrice],
         ["建议公开单价/台", totals.recommendedRetailUnitPrice],
         ["众筹产品总收入", totals.grossPledgeRevenue],
+        ["管理口径产品毛利", totals.managementProductGrossProfit],
         ["销售渠道扣减", totals.salesChannelDeductions],
-        ["销售净收入", totals.netSalesRevenue],
         ["产品贡献利润", totals.productContributionProfit],
-        ["首发项目净利润", totals.firstLaunchProjectNetProfit],
-        ["首发项目净利率%", totals.firstLaunchProjectNetMargin],
+        ["管理口径首发项目利润", totals.firstLaunchProjectProfit],
+        ["管理口径首发项目利润率%", totals.firstLaunchProjectProfitMargin],
         [],
         ["成本范围代码", "成本范围", "大类", "子类", "物料", "位号", "规格", "单台用量", "单位", "损耗率%", "选中供应商", "料号/SKU", "型号", "计价方式", "单价/批次价", "运费/台", "加工费/台", "单位成本计入额", "批次成本计入额", "备注"]
       ];
@@ -1931,7 +2696,7 @@
               sp.name || "",
               sp.sku || "",
               sp.model || "",
-              sp.pricingMode === "batch" ? "批次分摊" : "单台单价",
+              sp.id ? (sp.pricingMode === "batch" ? "批次分摊" : "单台单价") : "",
               sp.price || 0,
               sp.shipping || 0,
               it.processCost || 0,
@@ -1963,24 +2728,29 @@
     function calculateTotals(sourceData = data) {
       const totals = {
         batchQuantity: Math.max(1, number(sourceData.batchQty || 1)),
-        unitPreDeliveryCashCost: 0,
-        unitPostSaleSupportReserve: 0,
-        unitProductEconomicCost: 0,
-        batchManufacturingCashRequirement: 0,
-        batchProductEconomicCost: 0,
+        unitPreDeliveryFulfillmentCost: 0,
+        unitPostSaleSupportExpectedCost: 0,
+        unitFulfillmentCost: 0,
+        batchPreDeliveryFulfillmentCost: 0,
+        batchFulfillmentCost: 0,
         fixedLaunchInvestment: 0,
-        fullFirstLaunchEconomicCost: 0,
+        unitAllocatedFixedLaunchInvestment: 0,
+        unitFirstLaunchFullCost: 0,
+        firstLaunchProjectFullCost: 0,
         minimumAverageSellingPrice: 0,
         recommendedRetailUnitPrice: 0,
-        targetFirstLaunchProjectNetMarginRate: 0,
+        targetFirstLaunchProjectProfitMarginRate: 0,
         salesChannelDeductionRate: 0,
+        retainedCostCoverageRate: 0,
         grossPledgeRevenue: 0,
         salesChannelDeductions: 0,
         netSalesRevenue: 0,
+        managementProductGrossProfit: 0,
         productContributionProfit: 0,
-        firstLaunchProjectNetProfit: 0,
-        allocatedFirstLaunchProjectNetProfitPerUnit: 0,
-        firstLaunchProjectNetMargin: 0,
+        firstLaunchProjectProfit: 0,
+        allocatedFirstLaunchProjectProfitPerUnit: 0,
+        firstLaunchProjectProfitMargin: 0,
+        firstLaunchProjectProfitMarginRate: 0,
         itemCount: 0,
         missingSupplier: 0,
         byName: {},
@@ -1990,9 +2760,9 @@
         const total = categoryTotal(cat, sourceData);
         const scope = normalizeCostScope(cat.costScope);
         if (scope === COST_SCOPE_POST_SALE_SUPPORT) {
-          totals.unitPostSaleSupportReserve += total;
+          totals.unitPostSaleSupportExpectedCost += total;
         } else {
-          totals.unitPreDeliveryCashCost += total;
+          totals.unitPreDeliveryFulfillmentCost += total;
         }
         totals.byName[cat.name] = total;
         totals.byId[cat.id] = total;
@@ -2001,65 +2771,66 @@
           if (!getChosenSupplier(it)) totals.missingSupplier += 1;
         }));
       });
-      totals.unitProductEconomicCost = totals.unitPreDeliveryCashCost + totals.unitPostSaleSupportReserve;
-      totals.batchManufacturingCashRequirement = totals.unitPreDeliveryCashCost * totals.batchQuantity;
-      totals.batchProductEconomicCost = totals.unitProductEconomicCost * totals.batchQuantity;
+      totals.unitFulfillmentCost = totals.unitPreDeliveryFulfillmentCost + totals.unitPostSaleSupportExpectedCost;
+      totals.batchPreDeliveryFulfillmentCost = totals.unitPreDeliveryFulfillmentCost * totals.batchQuantity;
+      totals.batchFulfillmentCost = totals.unitFulfillmentCost * totals.batchQuantity;
       totals.fixedLaunchInvestment = Math.max(0, number(sourceData.fixedLaunchCost));
-      totals.fullFirstLaunchEconomicCost = totals.batchProductEconomicCost + totals.fixedLaunchInvestment;
-      totals.targetFirstLaunchProjectNetMarginRate = Math.min(60, Math.max(0, number(sourceData.targetNetMargin))) / 100;
+      totals.unitAllocatedFixedLaunchInvestment = totals.fixedLaunchInvestment / totals.batchQuantity;
+      totals.unitFirstLaunchFullCost = totals.unitFulfillmentCost + totals.unitAllocatedFixedLaunchInvestment;
+      totals.firstLaunchProjectFullCost = totals.batchFulfillmentCost + totals.fixedLaunchInvestment;
+      const targetProjectProfitMargin = sourceData.targetFirstLaunchProjectProfitMargin
+        ?? sourceData.compatibilityAliases?.targetNetMargin
+        ?? sourceData.targetNetMargin
+        ?? sourceData.targetMargin;
+      totals.targetFirstLaunchProjectProfitMarginRate = Math.min(60, Math.max(0, number(targetProjectProfitMargin))) / 100;
       totals.salesChannelDeductionRate = Math.min(30, Math.max(0, number(sourceData.salesFeeRate))) / 100;
-      const costCoverageRate = 1 - totals.targetFirstLaunchProjectNetMarginRate - totals.salesChannelDeductionRate;
-      totals.minimumAverageSellingPrice = costCoverageRate > 0
-        ? totals.fullFirstLaunchEconomicCost / costCoverageRate / totals.batchQuantity
+      totals.retainedCostCoverageRate = 1 - totals.targetFirstLaunchProjectProfitMarginRate - totals.salesChannelDeductionRate;
+      totals.minimumAverageSellingPrice = totals.retainedCostCoverageRate > 0
+        ? totals.unitFirstLaunchFullCost / totals.retainedCostCoverageRate
         : 0;
       totals.recommendedRetailUnitPrice = roundRetailPrice(totals.minimumAverageSellingPrice);
       totals.grossPledgeRevenue = totals.recommendedRetailUnitPrice * totals.batchQuantity;
       totals.salesChannelDeductions = totals.grossPledgeRevenue * totals.salesChannelDeductionRate;
       totals.netSalesRevenue = totals.grossPledgeRevenue - totals.salesChannelDeductions;
-      totals.productContributionProfit = totals.netSalesRevenue - totals.batchProductEconomicCost;
-      totals.firstLaunchProjectNetProfit = totals.productContributionProfit - totals.fixedLaunchInvestment;
-      totals.allocatedFirstLaunchProjectNetProfitPerUnit = totals.firstLaunchProjectNetProfit / totals.batchQuantity;
-      totals.firstLaunchProjectNetMargin = totals.grossPledgeRevenue > 0
-        ? totals.firstLaunchProjectNetProfit / totals.grossPledgeRevenue * 100
+      totals.managementProductGrossProfit = totals.grossPledgeRevenue - totals.batchFulfillmentCost;
+      totals.productContributionProfit = totals.managementProductGrossProfit - totals.salesChannelDeductions;
+      totals.firstLaunchProjectProfit = totals.productContributionProfit - totals.fixedLaunchInvestment;
+      totals.allocatedFirstLaunchProjectProfitPerUnit = totals.firstLaunchProjectProfit / totals.batchQuantity;
+      totals.firstLaunchProjectProfitMargin = totals.grossPledgeRevenue > 0
+        ? totals.firstLaunchProjectProfit / totals.grossPledgeRevenue * 100
         : 0;
+      totals.firstLaunchProjectProfitMarginRate = totals.firstLaunchProjectProfitMargin / 100;
 
-      // Backward-compatible aliases for saved sessions and integrations that still use the v2 names.
-      totals.unitTotal = totals.unitProductEconomicCost;
-      totals.batchTotal = totals.batchProductEconomicCost;
-      totals.fixedLaunchCost = totals.fixedLaunchInvestment;
-      totals.fullLaunchCost = totals.fullFirstLaunchEconomicCost;
-      totals.minimumPrice = totals.minimumAverageSellingPrice;
-      totals.suggestedPrice = totals.recommendedRetailUnitPrice;
-      totals.salesFeeTotal = totals.salesChannelDeductions;
-      totals.batchProfit = totals.firstLaunchProjectNetProfit;
-      totals.unitProfit = totals.allocatedFirstLaunchProjectNetProfitPerUnit;
-      totals.realizedNetMargin = totals.firstLaunchProjectNetMargin;
       return totals;
     }
 
     function buildFinancialSummary(totals, sourceData = data) {
       return {
-        schemaVersion: 1,
+        schemaVersion: 2,
         terminologyVersion: FINANCIAL_TERMINOLOGY_VERSION,
         currency: sourceData.currency || "",
         batchQuantity: totals.batchQuantity,
-        targetFirstLaunchProjectNetMarginRate: totals.targetFirstLaunchProjectNetMarginRate,
+        targetFirstLaunchProjectProfitMarginRate: totals.targetFirstLaunchProjectProfitMarginRate,
         salesChannelDeductionRate: totals.salesChannelDeductionRate,
-        unitPreDeliveryCashCost: totals.unitPreDeliveryCashCost,
-        unitPostSaleSupportReserve: totals.unitPostSaleSupportReserve,
-        unitProductEconomicCost: totals.unitProductEconomicCost,
-        batchManufacturingCashRequirement: totals.batchManufacturingCashRequirement,
-        batchProductEconomicCost: totals.batchProductEconomicCost,
+        retainedCostCoverageRate: totals.retainedCostCoverageRate,
+        unitPreDeliveryFulfillmentCost: totals.unitPreDeliveryFulfillmentCost,
+        unitPostSaleSupportExpectedCost: totals.unitPostSaleSupportExpectedCost,
+        unitFulfillmentCost: totals.unitFulfillmentCost,
+        batchPreDeliveryFulfillmentCost: totals.batchPreDeliveryFulfillmentCost,
+        batchFulfillmentCost: totals.batchFulfillmentCost,
         fixedLaunchInvestment: totals.fixedLaunchInvestment,
-        fullFirstLaunchEconomicCost: totals.fullFirstLaunchEconomicCost,
+        unitAllocatedFixedLaunchInvestment: totals.unitAllocatedFixedLaunchInvestment,
+        unitFirstLaunchFullCost: totals.unitFirstLaunchFullCost,
+        firstLaunchProjectFullCost: totals.firstLaunchProjectFullCost,
         minimumAverageSellingPrice: totals.minimumAverageSellingPrice,
         recommendedRetailUnitPrice: totals.recommendedRetailUnitPrice,
         grossPledgeRevenue: totals.grossPledgeRevenue,
         salesChannelDeductions: totals.salesChannelDeductions,
         netSalesRevenue: totals.netSalesRevenue,
+        managementProductGrossProfit: totals.managementProductGrossProfit,
         productContributionProfit: totals.productContributionProfit,
-        firstLaunchProjectNetProfit: totals.firstLaunchProjectNetProfit,
-        firstLaunchProjectNetMarginRate: totals.firstLaunchProjectNetMargin / 100
+        firstLaunchProjectProfit: totals.firstLaunchProjectProfit,
+        firstLaunchProjectProfitMarginRate: totals.firstLaunchProjectProfitMarginRate
       };
     }
 
@@ -2091,7 +2862,8 @@
     }
 
     function getChosenSupplier(it) {
-      return it.suppliers.find((sp) => sp.id === it.chosenSupplierId) || it.suppliers[0] || null;
+      if (!it.chosenSupplierId) return null;
+      return it.suppliers.find((sp) => sp.id === it.chosenSupplierId) || null;
     }
 
     function sumKeys(map, keys) {
@@ -2148,8 +2920,8 @@
 
     function costScopeLabel(value) {
       return normalizeCostScope(value) === COST_SCOPE_POST_SALE_SUPPORT
-        ? "售后支持预留"
-        : "生产交付前现金";
+        ? "售后支持预计成本"
+        : "交付前履约成本";
     }
 
     function formatNum(value) {

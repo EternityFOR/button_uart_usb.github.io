@@ -43,28 +43,30 @@ The matching `00_Office/projects/<project>/finance_model.json` record is the sou
 }
 ```
 
-When `canonicalRecord` is present, `node tools/build-cost-vault.mjs` verifies the batch quantity, sales-channel deduction rate, target first-launch project net margin, fixed launch investment, category ids, category cost scopes, category unit amounts, and recommended public unit price before writing the encrypted vault. A mismatch stops the build. Do not copy benchmark values into a second manually maintained summary.
+When `canonicalRecord` is present, `node tools/build-cost-vault.mjs` verifies the batch quantity, sales-channel deduction rate, target first-launch project profit margin, fixed launch investment, category ids, category cost scopes, category unit amounts, canonical benchmark results, and recommended public unit price before writing the encrypted vault. A mismatch stops the build.
+
+Private product data uses `targetFirstLaunchProjectProfitMargin` as the canonical percentage field. Older `targetNetMargin` and `targetMargin` values are accepted only while importing legacy data; new session data, JSON exports, cloud records, and vault builds write only the canonical field.
 
 Every cost category uses one of these scope codes:
 
-- `pre-delivery-cash`: unit manufacturing and pre-delivery cash cost (`单位生产交付前现金成本`)
-- `post-sale-support-reserve`: unit post-sale support reserve (`单位售后支持预留`)
+- `pre-delivery-cash`: unit pre-delivery fulfillment cost (`单位交付前履约成本`)
+- `post-sale-support-reserve`: expected unit after-sales support cost (`单位售后支持预计成本`)
 
-Their sum is unit product economic cost (`单位产品经济成本`). Legacy private products without `canonicalRecord` remain compatible: missing finance fields receive the existing UI defaults, and categories without a scope are treated as `pre-delivery-cash` during the build. Canonically synchronized products must declare every category scope explicitly.
+Their sum is unit fulfillment cost (`单位履约成本`). Fixed launch investment is then allocated across the planned batch; unit fulfillment cost plus that allocation is unit first-launch full cost (`单位首发完全成本`). Legacy private products without `canonicalRecord` remain compatible: missing finance fields receive the existing UI defaults, and categories without a scope are treated as `pre-delivery-cash` during the build. Canonically synchronized products must declare every category scope explicitly.
 
 The standard first-launch calculation bridge is:
 
 ```text
 gross pledge revenue
+- batch fulfillment cost
+= management product gross profit
 - sales-channel deductions
-= net sales revenue
-- batch product economic cost
 = product contribution profit
 - fixed launch investment
-= first-launch project net profit
+= first-launch project profit (management basis)
 ```
 
-First-launch project net margin is first-launch project net profit divided by gross pledge revenue. It is a planning measure, not statutory company net profit. JSON and CSV exports include the same calculated bridge and terminology version; calculated JSON summaries are regenerated on export and are not imported as source data.
+First-launch project profit margin is first-launch project profit divided by gross pledge revenue. It is a management-planning measure, not statutory company net profit. JSON and CSV exports include the same calculated bridge and terminology version; calculated JSON summaries are regenerated on export and are not imported as source data.
 
 Local preview:
 
