@@ -187,7 +187,7 @@
 
     .unlock-strip {
       display: grid;
-      grid-template-columns: 120px minmax(180px, 280px) minmax(240px, 1fr) auto auto minmax(180px, 320px);
+      grid-template-columns: 120px minmax(180px, 280px) minmax(220px, 1fr) auto auto auto minmax(160px, 280px);
       gap: 10px;
       align-items: center;
       padding: 12px 22px;
@@ -213,6 +213,25 @@
       font-weight: 400;
     }
 
+    .remember-unlock {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .remember-unlock input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+
     .planner-page {
       display: grid;
       gap: 14px;
@@ -234,7 +253,7 @@
 
     .cost-overview {
       display: grid;
-      grid-template-columns: minmax(190px, 1.35fr) repeat(4, minmax(125px, 1fr)) minmax(155px, 1fr);
+      grid-template-columns: repeat(3, minmax(225px, 1fr)) minmax(170px, .72fr);
       min-width: 0;
       overflow: hidden;
       border: 1px solid var(--line);
@@ -245,7 +264,7 @@
 
     .overview-metric {
       min-width: 0;
-      min-height: 62px;
+      min-height: 72px;
       display: grid;
       align-content: center;
       gap: 3px;
@@ -285,6 +304,16 @@
 
     .overview-metric.primary .overview-value {
       font-size: 23px;
+    }
+
+    .overview-detail {
+      overflow: hidden;
+      color: var(--muted-2);
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 1.35;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .locked-summary {
@@ -430,6 +459,10 @@
       border-left-color: #8a5fc7;
     }
 
+    .category.scope-fixed-launch {
+      border-left-color: #b7791f;
+    }
+
     .category-header,
     .group-header,
     .item-header {
@@ -458,6 +491,14 @@
 
     .category.scope-post-sale:not(.collapsed) > .category-header {
       background: #e9e0f8;
+    }
+
+    .category.scope-fixed-launch > .category-header {
+      background: #fff8e8;
+    }
+
+    .category.scope-fixed-launch:not(.collapsed) > .category-header {
+      background: #ffedbd;
     }
 
     .category.collapsed > .category-header {
@@ -981,7 +1022,7 @@
       }
 
       .unlock-strip {
-        grid-template-columns: 110px minmax(180px, 1fr) auto auto;
+        grid-template-columns: 110px minmax(180px, 1fr) auto auto auto;
       }
 
       .unlock-strip #productAccessCode,
@@ -1034,7 +1075,16 @@
 
     @media (max-width: 900px) {
       .cost-overview {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        display: flex;
+        overflow-x: auto;
+      }
+
+      .overview-metric {
+        flex: 0 0 250px;
+      }
+
+      .overview-metric.primary {
+        flex-basis: 270px;
       }
     }
 
@@ -1115,17 +1165,21 @@
         grid-column: 1 / -1;
       }
 
+      .remember-unlock {
+        grid-column: 1 / -1;
+      }
+
       .cost-overview {
         display: flex;
         overflow-x: auto;
       }
 
       .overview-metric {
-        flex: 0 0 158px;
+        flex: 0 0 230px;
       }
 
       .overview-metric.primary {
-        flex-basis: 180px;
+        flex-basis: 250px;
       }
 
       .assumption-grid {
@@ -1262,6 +1316,10 @@
     <div class="unlock-title">产品解锁</div>
     <select id="vaultProductSelect" aria-label="选择要解锁的产品"></select>
     <input id="productAccessCode" type="password" autocomplete="off" placeholder="输入访问码">
+    <label class="remember-unlock" title="仅保存在当前浏览器；清除解锁会同时删除">
+      <input id="rememberUnlock" type="checkbox" checked>
+      <span>记住本机</span>
+    </label>
     <button class="primary" id="unlockProductBtn">解锁产品</button>
     <button id="lockSessionBtn">清除解锁</button>
     <div class="unlock-status" id="unlockStatus">正在加载密文包...</div>
@@ -1283,13 +1341,13 @@
         <div class="field">
           <label for="currency">币种</label>
           <select id="currency">
-            <option value="¥">¥ 人民币</option>
-            <option value="HK$">HK$ 港币</option>
-            <option value="$">$ 美元</option>
+            <option value="¥">CNY 人民币</option>
+            <option value="HK$">HKD 港币</option>
+            <option value="$">USD 美元</option>
           </select>
         </div>
         <div class="field">
-          <label for="targetProjectProfitMargin">目标利润率 %</label>
+          <label for="targetProjectProfitMargin">目标首发项目利润率 %</label>
           <input id="targetProjectProfitMargin" type="number" min="0" max="60" step="1">
         </div>
         <div class="field">
@@ -1297,7 +1355,7 @@
           <input id="salesFeeRate" type="number" min="0" max="30" step="0.5">
         </div>
         <div class="field">
-          <label for="fixedLaunchCost">一次性固定成本</label>
+          <label for="fixedLaunchCost" id="fixedLaunchCostLabel">首发固定投入</label>
           <input id="fixedLaunchCost" type="number" min="0" step="1">
         </div>
       </div>
@@ -1397,11 +1455,13 @@
     const STORAGE_KEY = "dedge-cost-planner-session-v1";
     const LEGACY_STORAGE_KEY = "cost-planner-v1";
     const CLOUD_CONFIG_KEY = "cost-planner-cloud-config-v1";
+    const UNLOCK_PREFERENCE_KEY = "dedge-cost-planner-unlock-preference-v1";
     const DEFAULT_CLOUD_DOC_KEY = "product-cost";
     const DEFAULT_USER_NAME = "未填写";
     const VAULT_URL = "data/cost-vault.json";
     const COST_SCOPE_PRE_DELIVERY_CASH = "pre-delivery-cash";
     const COST_SCOPE_POST_SALE_SUPPORT = "post-sale-support-reserve";
+    const COST_SCOPE_FIXED_LAUNCH = "fixed-launch-investment";
     const FINANCIAL_TERMINOLOGY_VERSION = "2026-07-17-full-cost";
 
     const blankProductTemplate = {
@@ -1425,6 +1485,7 @@
     const el = {
       vaultProductSelect: document.getElementById("vaultProductSelect"),
       productAccessCode: document.getElementById("productAccessCode"),
+      rememberUnlock: document.getElementById("rememberUnlock"),
       unlockStatus: document.getElementById("unlockStatus"),
       productSelect: document.getElementById("productSelect"),
       projectName: document.getElementById("projectName"),
@@ -1433,6 +1494,7 @@
       targetProjectProfitMargin: document.getElementById("targetProjectProfitMargin"),
       salesFeeRate: document.getElementById("salesFeeRate"),
       fixedLaunchCost: document.getElementById("fixedLaunchCost"),
+      fixedLaunchCostLabel: document.getElementById("fixedLaunchCostLabel"),
       globalNote: document.getElementById("globalNote"),
       summary: document.getElementById("summary"),
       categoryNav: document.getElementById("categoryNav"),
@@ -1595,6 +1657,7 @@
     }
 
     function save() {
+      if (store.products.length) syncFixedLaunchCost(data);
       store._localUpdatedAt = new Date().toISOString();
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(store));
     }
@@ -1614,9 +1677,64 @@
       localStorage.setItem(CLOUD_CONFIG_KEY, JSON.stringify(cloudConfig));
     }
 
+    function loadUnlockPreference() {
+      const fallback = { remember: true, productId: "", accessCode: "" };
+      try {
+        const raw = localStorage.getItem(UNLOCK_PREFERENCE_KEY);
+        if (!raw) return fallback;
+        const value = JSON.parse(raw);
+        return {
+          remember: value?.remember !== false,
+          productId: String(value?.productId || ""),
+          accessCode: String(value?.accessCode || "")
+        };
+      } catch {
+        return fallback;
+      }
+    }
+
+    function restoreUnlockPreference() {
+      const preference = loadUnlockPreference();
+      const products = Array.isArray(costVault?.products) ? costVault.products : [];
+      el.rememberUnlock.checked = preference.remember;
+      if (products.some((product) => product.id === preference.productId)) {
+        el.vaultProductSelect.value = preference.productId;
+      }
+      restoreAccessCodeForSelection();
+    }
+
+    function restoreAccessCodeForSelection() {
+      const preference = loadUnlockPreference();
+      el.productAccessCode.value = preference.remember
+        && preference.productId === el.vaultProductSelect.value
+        ? preference.accessCode
+        : "";
+    }
+
+    function saveUnlockPreference(productId, accessCode) {
+      if (!el.rememberUnlock.checked) {
+        localStorage.removeItem(UNLOCK_PREFERENCE_KEY);
+        return;
+      }
+      localStorage.setItem(UNLOCK_PREFERENCE_KEY, JSON.stringify({
+        remember: true,
+        productId,
+        accessCode
+      }));
+    }
+
+    function clearUnlockPreference() {
+      localStorage.removeItem(UNLOCK_PREFERENCE_KEY);
+      el.productAccessCode.value = "";
+    }
+
     function bindGlobalEvents() {
       document.getElementById("unlockProductBtn").addEventListener("click", unlockProduct);
       document.getElementById("lockSessionBtn").addEventListener("click", clearUnlockedProducts);
+      el.vaultProductSelect.addEventListener("change", restoreAccessCodeForSelection);
+      el.rememberUnlock.addEventListener("change", () => {
+        if (!el.rememberUnlock.checked) clearUnlockPreference();
+      });
       el.productAccessCode.addEventListener("keydown", (event) => {
         if (event.key === "Enter") unlockProduct();
       });
@@ -1695,6 +1813,7 @@
         : `<option value="">暂无可解锁产品</option>`;
       el.vaultProductSelect.disabled = !products.length;
       document.getElementById("unlockProductBtn").disabled = !products.length;
+      restoreUnlockPreference();
     }
 
     async function unlockProduct() {
@@ -1727,7 +1846,8 @@
         }
         store.activeProductId = product.id;
         data = product;
-        el.productAccessCode.value = "";
+        saveUnlockPreference(entry.id, accessCode);
+        el.productAccessCode.value = el.rememberUnlock.checked ? accessCode : "";
         save();
         render();
         setUnlockStatus(`已解锁：${product.projectName || entry.label || product.id}`);
@@ -1775,6 +1895,7 @@
       sessionStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(LEGACY_STORAGE_KEY);
+      clearUnlockPreference();
       store = createStore([]);
       data = activeProduct();
       localSavedAt = "";
@@ -1832,6 +1953,7 @@
 
     function render() {
       data = activeProduct();
+      if (store.products.length) syncFixedLaunchCost(data);
       renderProductSelect();
       el.projectName.value = data.projectName || "";
       el.batchQty.value = data.batchQty || 1;
@@ -1841,6 +1963,7 @@
       el.fixedLaunchCost.value = data.fixedLaunchCost ?? 0;
       el.globalNote.value = data.note || "";
       const hasProducts = Boolean(store.products.length);
+      const fixedLaunchDetailed = hasFixedLaunchDetails(data);
       [
         el.projectName,
         el.batchQty,
@@ -1858,6 +1981,13 @@
         document.getElementById("saveCloudBtn"),
         document.getElementById("resetBtn")
       ].forEach((node) => node.disabled = !hasProducts);
+      el.fixedLaunchCost.disabled = !hasProducts || fixedLaunchDetailed;
+      el.fixedLaunchCostLabel.textContent = fixedLaunchDetailed
+        ? "首发固定投入（明细汇总）"
+        : "首发固定投入";
+      el.fixedLaunchCost.title = fixedLaunchDetailed
+        ? "由下方“首发固定投入”类别自动汇总；请在明细中修改"
+        : "";
       renderSummary();
       renderNav();
       renderCategories();
@@ -1907,29 +2037,25 @@
 
       el.summary.innerHTML = `
         <div class="cost-overview">
-          <div class="overview-metric primary" title="单位履约成本加一次性固定成本的单台分摊">
-            <span class="overview-label">单位完全成本</span>
+          <div class="overview-metric" title="单位履约成本 = 单位交付前履约成本 + 单位售后支持预计成本">
+            <span class="overview-label">单位履约成本</span>
+            <strong class="overview-value">${escapeHtml(money(totals.unitFulfillmentCost))}</strong>
+            <span class="overview-detail">交付前 ${escapeHtml(formatFixed(totals.unitPreDeliveryFulfillmentCost))} + 售后 ${escapeHtml(formatFixed(totals.unitPostSaleSupportExpectedCost))}</span>
+          </div>
+          <div class="overview-metric primary" title="单位首发完全成本 = 单位履约成本 + 首发固定投入 ÷ 批次数量">
+            <span class="overview-label">单位首发完全成本</span>
             <strong class="overview-value">${escapeHtml(money(totals.unitFirstLaunchFullCost))}</strong>
+            <span class="overview-detail">履约 ${escapeHtml(formatFixed(totals.unitFulfillmentCost))} + 固定分摊 ${escapeHtml(formatFixed(totals.unitAllocatedFixedLaunchInvestment))}</span>
           </div>
-          <div class="overview-metric" title="交付产品前发生的单台成本">
-            <span class="overview-label">交付前 / 台</span>
-            <strong class="overview-value">${escapeHtml(money(totals.unitPreDeliveryFulfillmentCost))}</strong>
-          </div>
-          <div class="overview-metric" title="单台售后支持预计成本">
-            <span class="overview-label">售后支持 / 台</span>
-            <strong class="overview-value">${escapeHtml(money(totals.unitPostSaleSupportExpectedCost))}</strong>
-          </div>
-          <div class="overview-metric" title="一次性固定成本除以批次数量">
-            <span class="overview-label">固定成本分摊 / 台</span>
-            <strong class="overview-value">${escapeHtml(money(totals.unitAllocatedFixedLaunchInvestment))}</strong>
-          </div>
-          <div class="overview-metric" title="当前批次的履约成本与一次性固定成本合计">
-            <span class="overview-label">批次总成本 · ${totals.batchQuantity} 台</span>
+          <div class="overview-metric" title="首发项目完全成本 = 单位履约成本 × 批次数量 + 首发固定投入">
+            <span class="overview-label">首发项目完全成本 · ${totals.batchQuantity} 台</span>
             <strong class="overview-value">${escapeHtml(money(totals.firstLaunchProjectFullCost))}</strong>
+            <span class="overview-detail">${escapeHtml(formatFixed(totals.unitFulfillmentCost))} × ${totals.batchQuantity} + ${escapeHtml(formatFixed(totals.fixedLaunchInvestment, 2))}</span>
           </div>
           <div class="overview-metric ${totals.missingSupplier > 0 ? "warning" : ""}">
             <span class="overview-label">成本项 / 供应商</span>
             <strong class="overview-value">${totals.itemCount} 项 · ${escapeHtml(supplierStatus)}</strong>
+            <span class="overview-detail">固定投入 ${escapeHtml(money(totals.fixedLaunchInvestment))}</span>
           </div>
         </div>
       `;
@@ -1942,11 +2068,29 @@
       }
       const totals = calculateTotals();
       el.categoryNav.innerHTML = data.categories.map((cat) => `
-        <a class="nav-item" href="#cat-${cat.id}">
+        <a class="nav-item" href="#cat-${cat.id}" data-nav-category="${cat.id}">
           <span class="nav-name">${escapeHtml(cat.name)}</span>
           <span class="nav-price">${money(totals.byId[cat.id] || 0)}</span>
         </a>
       `).join("");
+      el.categoryNav.querySelectorAll("[data-nav-category]").forEach((node) => {
+        node.addEventListener("click", (event) => {
+          event.preventDefault();
+          openCategoryFromNav(node.dataset.navCategory);
+        });
+      });
+    }
+
+    function openCategoryFromNav(categoryId) {
+      const cat = findCategory(categoryId);
+      if (!cat) return;
+      cat.collapsed = false;
+      cat.groups.forEach((grp) => grp.collapsed = false);
+      save();
+      renderCategories();
+      requestAnimationFrame(() => {
+        document.getElementById(`cat-${categoryId}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     }
 
     function renderCategories() {
@@ -1962,9 +2106,12 @@
     function renderCategory(cat) {
       const groups = cat.groups.map((grp) => renderGroup(cat, grp)).filter(Boolean);
       if (filterText && !matchesCategory(cat) && !groups.length) return "";
-      const scopeClass = normalizeCostScope(cat.costScope) === COST_SCOPE_POST_SALE_SUPPORT
-        ? "scope-post-sale"
-        : "scope-pre-delivery";
+      const scope = normalizeCostScope(cat.costScope);
+      const scopeClass = scope === COST_SCOPE_FIXED_LAUNCH
+        ? "scope-fixed-launch"
+        : scope === COST_SCOPE_POST_SALE_SUPPORT
+          ? "scope-post-sale"
+          : "scope-pre-delivery";
       return `
         <article class="category ${scopeClass} ${cat.collapsed ? "collapsed" : ""}" id="cat-${cat.id}">
           <div class="category-header">
@@ -1973,7 +2120,7 @@
               <span class="heading-main"><strong>${escapeHtml(cat.name)}</strong><small>${escapeHtml(cat.note || "")}</small></span>
               <span class="pill category-scope">${escapeHtml(costScopeLabel(cat.costScope))}</span>
               <span class="pill category-count">${cat.groups.length}组 / ${itemCount(cat)}项</span>
-              <span class="money">${escapeHtml(money(categoryTotal(cat)))}</span>
+              <span class="money">${escapeHtml(money(categoryDisplayAmount(cat)))}</span>
             </button>
             <span class="category-tools">
               <button type="button" data-action="add-group" data-category-id="${cat.id}">加子类</button>
@@ -1994,7 +2141,7 @@
             <button type="button" class="header-toggle group-toggle" data-toggle-group="${cat.id}:${grp.id}" aria-expanded="${grp.collapsed ? "false" : "true"}">
               <span class="twisty" aria-hidden="true"></span>
               <span class="heading-main"><strong>${escapeHtml(grp.name)}</strong><small>${escapeHtml(grp.note || "")}</small></span>
-              <span class="money">${escapeHtml(money(groupTotal(grp)))}</span>
+              <span class="money">${escapeHtml(money(groupDisplayAmount(cat, grp)))}</span>
             </button>
             <span class="group-tools">
               <button type="button" data-action="add-item" data-category-id="${cat.id}" data-group-id="${grp.id}">加物料</button>
@@ -2010,15 +2157,16 @@
       if (filterText && !matchesItem(it)) return "";
       const chosen = getChosenSupplier(it);
       const identity = [it.designator, it.footprint].filter(Boolean).join(" · ") || it.note || "未填写规格";
+      const fixedLaunchItem = isFixedLaunchScope(cat.costScope);
       return `
         <section class="item ${it.collapsed ? "collapsed" : ""}">
           <div class="item-header">
             <button type="button" class="header-toggle item-toggle" data-toggle-item="${cat.id}:${grp.id}:${it.id}" aria-expanded="${it.collapsed ? "false" : "true"}">
               <span class="twisty" aria-hidden="true"></span>
               <span class="heading-main"><strong>${escapeHtml(it.name)}</strong><small>${escapeHtml(identity)}</small></span>
-              ${headerCell(`${formatNum(it.qty)} ${it.unit || "pcs"}`, "单台用量", "summary-qty")}
+              ${headerCell(`${formatNum(it.qty)} ${it.unit || "pcs"}`, fixedLaunchItem ? "数量" : "单台用量", "summary-qty")}
               ${headerCell(chosen?.name || "未选供应商", "供应商", "summary-supplier")}
-              ${headerCell(money(itemUnitCost(it)), "单位成本计入额", "summary-cost")}
+              ${headerCell(money(itemDisplayAmount(cat, it)), fixedLaunchItem ? "首发固定金额" : "单位成本计入额", "summary-cost")}
             </button>
             <span class="item-tools"><button type="button" data-action="edit-item" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}">编辑</button></span>
           </div>
@@ -2035,7 +2183,7 @@
             </div>
             <div class="suppliers">
               <div class="supplier-head">
-                <span>选</span><span>供应商</span><span>型号/商品</span><span>料号/SKU</span><span>计价方式</span><span>单价/批次价</span><span>运费/台</span><span>MOQ</span><span>小计/台</span><span>操作</span>
+                <span>选</span><span>供应商</span><span>型号/商品</span><span>料号/SKU</span><span>计价方式</span><span>单价/批次价</span><span>运费/台</span><span>MOQ</span><span>${fixedLaunchItem ? "固定金额" : "小计/台"}</span><span>操作</span>
               </div>
               ${it.suppliers.map((sp) => renderSupplier(cat, grp, it, sp)).join("")}
             </div>
@@ -2063,7 +2211,7 @@
           <input type="number" min="0" step="0.0001" value="${escapeAttr(sp.price)}" data-supplier-field="price" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}" data-supplier-id="${sp.id}">
           <input type="number" min="0" step="0.0001" value="${escapeAttr(sp.shipping)}" data-supplier-field="shipping" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}" data-supplier-id="${sp.id}">
           <input type="number" min="0" step="1" value="${escapeAttr(sp.moq)}" data-supplier-field="moq" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}" data-supplier-id="${sp.id}">
-          <span class="${checked ? "chosen" : ""}">${money(supplierUnitCost(it, sp))}</span>
+          <span class="${checked ? "chosen" : ""}">${money(supplierDisplayAmount(cat, it, sp))}</span>
           <button class="danger" data-action="delete-supplier" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}" data-supplier-id="${sp.id}">删除</button>
         </div>
       `;
@@ -2171,14 +2319,14 @@
       if (!name) return;
       const note = prompt("大类备注", cat.note || "");
       const scope = prompt(
-        "成本范围代码：pre-delivery-cash 或 post-sale-support-reserve",
+        "成本范围代码：pre-delivery-cash、post-sale-support-reserve 或 fixed-launch-investment",
         normalizeCostScope(cat.costScope)
       );
       let normalizedScope = normalizeCostScope(cat.costScope);
       if (scope !== null) {
         normalizedScope = normalizeCostScope(scope, "");
         if (!normalizedScope) {
-          alert("成本范围只能是 pre-delivery-cash 或 post-sale-support-reserve。");
+          alert("成本范围只能是 pre-delivery-cash、post-sale-support-reserve 或 fixed-launch-investment。");
           return;
         }
       }
@@ -2660,13 +2808,15 @@
       sourceData.categories.forEach((cat) => {
         const total = categoryTotal(cat, sourceData);
         const scope = normalizeCostScope(cat.costScope);
-        if (scope === COST_SCOPE_POST_SALE_SUPPORT) {
+        if (scope === COST_SCOPE_FIXED_LAUNCH) {
+          // Fixed-launch categories are batch-level details and do not enter unit fulfillment cost.
+        } else if (scope === COST_SCOPE_POST_SALE_SUPPORT) {
           totals.unitPostSaleSupportExpectedCost += total;
         } else {
           totals.unitPreDeliveryFulfillmentCost += total;
         }
-        totals.byName[cat.name] = total;
-        totals.byId[cat.id] = total;
+        totals.byName[cat.name] = categoryDisplayAmount(cat, sourceData);
+        totals.byId[cat.id] = categoryDisplayAmount(cat, sourceData);
         cat.groups.forEach((grp) => grp.items.forEach((it) => {
           totals.itemCount += 1;
           if (!getChosenSupplier(it)) totals.missingSupplier += 1;
@@ -2675,7 +2825,9 @@
       totals.unitFulfillmentCost = totals.unitPreDeliveryFulfillmentCost + totals.unitPostSaleSupportExpectedCost;
       totals.batchPreDeliveryFulfillmentCost = totals.unitPreDeliveryFulfillmentCost * totals.batchQuantity;
       totals.batchFulfillmentCost = totals.unitFulfillmentCost * totals.batchQuantity;
-      totals.fixedLaunchInvestment = Math.max(0, number(sourceData.fixedLaunchCost));
+      totals.fixedLaunchInvestment = hasFixedLaunchDetails(sourceData)
+        ? fixedLaunchDetailTotal(sourceData)
+        : Math.max(0, number(sourceData.fixedLaunchCost));
       totals.unitAllocatedFixedLaunchInvestment = totals.fixedLaunchInvestment / totals.batchQuantity;
       totals.unitFirstLaunchFullCost = totals.unitFulfillmentCost + totals.unitAllocatedFixedLaunchInvestment;
       totals.firstLaunchProjectFullCost = totals.batchFulfillmentCost + totals.fixedLaunchInvestment;
@@ -2738,6 +2890,54 @@
     function roundRetailPrice(value) {
       if (!Number.isFinite(value) || value <= 0) return 0;
       return Math.ceil((value + 1) / 10) * 10 - 1;
+    }
+
+    function isFixedLaunchScope(value) {
+      return normalizeCostScope(value) === COST_SCOPE_FIXED_LAUNCH;
+    }
+
+    function hasFixedLaunchDetails(sourceData = data) {
+      return sourceData.categories.some((cat) => isFixedLaunchScope(cat.costScope));
+    }
+
+    function fixedLaunchDetailTotal(sourceData = data) {
+      const batchQuantity = Math.max(1, number(sourceData.batchQty || 1));
+      return sourceData.categories
+        .filter((cat) => isFixedLaunchScope(cat.costScope))
+        .reduce((sum, cat) => sum + categoryTotal(cat, sourceData) * batchQuantity, 0);
+    }
+
+    function syncFixedLaunchCost(sourceData = data) {
+      if (!hasFixedLaunchDetails(sourceData)) return;
+      sourceData.fixedLaunchCost = Math.round(fixedLaunchDetailTotal(sourceData) * 10000) / 10000;
+    }
+
+    function categoryDisplayAmount(cat, sourceData = data) {
+      const amount = categoryTotal(cat, sourceData);
+      return isFixedLaunchScope(cat.costScope)
+        ? amount * Math.max(1, number(sourceData.batchQty || 1))
+        : amount;
+    }
+
+    function groupDisplayAmount(cat, grp, sourceData = data) {
+      const amount = groupTotal(grp, sourceData);
+      return isFixedLaunchScope(cat.costScope)
+        ? amount * Math.max(1, number(sourceData.batchQty || 1))
+        : amount;
+    }
+
+    function itemDisplayAmount(cat, it, sourceData = data) {
+      const amount = itemUnitCost(it, sourceData);
+      return isFixedLaunchScope(cat.costScope)
+        ? amount * Math.max(1, number(sourceData.batchQty || 1))
+        : amount;
+    }
+
+    function supplierDisplayAmount(cat, it, sp, sourceData = data) {
+      const amount = supplierUnitCost(it, sp, sourceData);
+      return isFixedLaunchScope(cat.costScope)
+        ? amount * Math.max(1, number(sourceData.batchQty || 1))
+        : amount;
     }
 
     function categoryTotal(cat, sourceData = data) {
@@ -2815,18 +3015,30 @@
     }
 
     function normalizeCostScope(value, fallback = COST_SCOPE_PRE_DELIVERY_CASH) {
-      if (value === COST_SCOPE_PRE_DELIVERY_CASH || value === COST_SCOPE_POST_SALE_SUPPORT) return value;
+      if (
+        value === COST_SCOPE_PRE_DELIVERY_CASH
+        || value === COST_SCOPE_POST_SALE_SUPPORT
+        || value === COST_SCOPE_FIXED_LAUNCH
+      ) return value;
       return fallback;
     }
 
     function costScopeLabel(value) {
-      return normalizeCostScope(value) === COST_SCOPE_POST_SALE_SUPPORT
-        ? "售后支持预计成本"
-        : "交付前履约成本";
+      const scope = normalizeCostScope(value);
+      if (scope === COST_SCOPE_FIXED_LAUNCH) return "首发固定投入";
+      if (scope === COST_SCOPE_POST_SALE_SUPPORT) return "售后支持预计成本";
+      return "交付前履约成本";
     }
 
     function formatNum(value) {
       return new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 4 }).format(number(value));
+    }
+
+    function formatFixed(value, digits = 4) {
+      return new Intl.NumberFormat("zh-CN", {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+      }).format(number(value));
     }
 
     function formatBytes(value) {
@@ -2841,10 +3053,18 @@
     }
 
     function money(value) {
-      return `${data.currency || "¥"}${new Intl.NumberFormat("zh-CN", {
+      return `${currencyCode(data.currency)} ${new Intl.NumberFormat("zh-CN", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 4
       }).format(number(value))}`;
+    }
+
+    function currencyCode(value) {
+      const currency = String(value || "").trim().toUpperCase();
+      if (currency === "HK$" || currency === "HKD") return "HKD";
+      if (currency === "¥" || currency === "CNY" || currency === "RMB") return "CNY";
+      if (currency === "$" || currency === "USD") return "USD";
+      return currency || "CNY";
     }
 
     function escapeHtml(value) {

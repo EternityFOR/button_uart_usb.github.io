@@ -6,7 +6,7 @@ const DEFAULT_ITERATIONS = 210000;
 const DEFAULT_TOLERANCE = 0.0001;
 const PUBLIC_ID_PATTERN = /^product-[a-z0-9-]+$/;
 const PUBLIC_LABEL_PATTERN = /^Product [A-Z0-9]+$/;
-const COST_SCOPES = new Set(["pre-delivery-cash", "post-sale-support-reserve"]);
+const COST_SCOPES = new Set(["pre-delivery-cash", "post-sale-support-reserve", "fixed-launch-investment"]);
 
 const sourcePath = process.argv[2] || ".private/products";
 const outputPath = process.argv[3] || "data/cost-vault.json";
@@ -140,7 +140,7 @@ function validateProductData(data, sourceFile) {
     if (categoryIds.has(category.id)) fail(sourceFile, `Duplicate category id: ${category.id}`);
     categoryIds.add(category.id);
     if (!COST_SCOPES.has(category.costScope)) {
-      fail(sourceFile, `${categoryPath}.costScope must be pre-delivery-cash or post-sale-support-reserve.`);
+      fail(sourceFile, `${categoryPath}.costScope must be pre-delivery-cash, post-sale-support-reserve, or fixed-launch-investment.`);
     }
     if (!Array.isArray(category.groups)) fail(sourceFile, `${categoryPath}.groups must be an array.`);
 
@@ -226,15 +226,16 @@ async function validateCanonicalRecord(record, data, sourceFile) {
   assertClose(data.fixedLaunchCost, canonical.fixedLaunchInvestment, tolerance, sourceFile, "fixed launch investment");
 
   const financials = calculateFinancials(data);
+  const unitCategories = data.categories.filter((category) => category.costScope !== "fixed-launch-investment");
   const componentById = new Map(canonical.costComponents.map((component) => [component.id, component]));
   if (componentById.size !== canonical.costComponents.length) {
     fail(canonicalPath, "costComponents ids must be unique.");
   }
-  if (componentById.size !== data.categories.length) {
-    fail(sourceFile, "Planner categories and canonical costComponents must contain the same ids.");
+  if (componentById.size !== unitCategories.length) {
+    fail(sourceFile, "Planner recurring-cost categories and canonical costComponents must contain the same ids.");
   }
 
-  for (const category of data.categories) {
+  for (const category of unitCategories) {
     const component = componentById.get(category.id);
     if (!component) fail(sourceFile, `Canonical cost component missing for category ${category.id}.`);
     if (component.costScope !== category.costScope) {
@@ -249,6 +250,58 @@ async function validateCanonicalRecord(record, data, sourceFile) {
       `category ${category.id} unit cost`
     );
   }
+
+  const canonicalFixedComponents = canonical.fixedLaunchComponents || [];
+  if (!Array.isArray(canonicalFixedComponents) || !canonicalFixedComponents.length) {
+    fail(canonicalPath, "fixedLaunchComponents must be a non-empty array when the planner has fixed-launch details.");
+  }
+  const fixedComponentById = new Map(canonicalFixedComponents.map((component) => [component.id, component]));
+  if (fixedComponentById.size !== canonicalFixedComponents.length) {
+    fail(canonicalPath, "fixedLaunchComponents ids must be unique.");
+  }
+  const fixedGroups = data.categories
+    .filter((category) => category.costScope === "fixed-launch-investment")
+    .flatMap((category) => category.groups || []);
+  if (fixedComponentById.size !== fixedGroups.length) {
+    fail(sourceFile, "Planner fixed-launch groups and canonical fixedLaunchComponents must contain the same ids.");
+  }
+  for (const group of fixedGroups) {
+    const component = fixedComponentById.get(group.id);
+    if (!component) fail(sourceFile, `Canonical fixed-launch component missing for group ${group.id}.`);
+    assertNonNegativeNumber(component.amount, canonicalPath, `fixedLaunchComponents.${group.id}.amount`);
+    const groupAmount = group.items.reduce(
+      (sum, item) => sum + itemUnitCost(data, item) * Number(data.batchQty),
+      0
+    );
+    assertClose(groupAmount, component.amount, tolerance, sourceFile, `fixed-launch group ${group.id}`);
+
+    if (component.items != null) {
+      if (!Array.isArray(component.items)) fail(canonicalPath, `fixedLaunchComponents.${group.id}.items must be an array.`);
+      const canonicalItems = new Map(component.items.map((item) => [item.id, item]));
+      if (canonicalItems.size !== component.items.length || canonicalItems.size !== group.items.length) {
+        fail(sourceFile, `Fixed-launch items differ for group ${group.id}.`);
+      }
+      for (const item of group.items) {
+        const canonicalItem = canonicalItems.get(item.id);
+        if (!canonicalItem) fail(sourceFile, `Canonical fixed-launch item missing for ${item.id}.`);
+        assertNonNegativeNumber(canonicalItem.amount, canonicalPath, `fixedLaunchComponents.${group.id}.${item.id}.amount`);
+        assertClose(
+          itemUnitCost(data, item) * Number(data.batchQty),
+          canonicalItem.amount,
+          tolerance,
+          sourceFile,
+          `fixed-launch item ${item.id}`
+        );
+      }
+    }
+  }
+  assertClose(
+    financials.fixedLaunchInvestmentFromCategories,
+    canonical.fixedLaunchInvestment,
+    tolerance,
+    sourceFile,
+    "fixed-launch category total"
+  );
 
   assertClose(
     financials.recommendedRetailUnitPrice,
@@ -284,6 +337,7 @@ function calculateFinancials(data) {
   let unitPreDeliveryFulfillmentCost = 0;
   let expectedUnitAfterSalesSupportCost = 0;
   let unitFulfillmentCost = 0;
+  let fixedLaunchInvestmentFromCategories = 0;
 
   for (const category of data.categories) {
     const categoryUnitCost = category.groups.reduce(
@@ -294,19 +348,23 @@ function calculateFinancials(data) {
       0
     );
     categoryUnitCosts.set(category.id, categoryUnitCost);
-    if (category.costScope === "post-sale-support-reserve") {
+    if (category.costScope === "fixed-launch-investment") {
+      fixedLaunchInvestmentFromCategories += categoryUnitCost * batchQuantity;
+    } else if (category.costScope === "post-sale-support-reserve") {
       expectedUnitAfterSalesSupportCost += categoryUnitCost;
+      unitFulfillmentCost += categoryUnitCost;
     } else {
       unitPreDeliveryFulfillmentCost += categoryUnitCost;
+      unitFulfillmentCost += categoryUnitCost;
     }
-    unitFulfillmentCost += categoryUnitCost;
   }
 
   const batchPreDeliveryFulfillmentCost = unitPreDeliveryFulfillmentCost * batchQuantity;
   const batchFulfillmentCost = unitFulfillmentCost * batchQuantity;
-  const unitAllocatedFixedLaunchInvestment = Number(data.fixedLaunchCost) / batchQuantity;
+  const fixedLaunchInvestment = fixedLaunchInvestmentFromCategories || Number(data.fixedLaunchCost);
+  const unitAllocatedFixedLaunchInvestment = fixedLaunchInvestment / batchQuantity;
   const unitFirstLaunchFullCost = unitFulfillmentCost + unitAllocatedFixedLaunchInvestment;
-  const firstLaunchProjectFullCost = batchFulfillmentCost + Number(data.fixedLaunchCost);
+  const firstLaunchProjectFullCost = batchFulfillmentCost + fixedLaunchInvestment;
   const costCoverageRate = 1 - Number(data.targetFirstLaunchProjectProfitMargin) / 100 - Number(data.salesFeeRate) / 100;
   const minimumAverageSellingPrice = firstLaunchProjectFullCost / costCoverageRate / batchQuantity;
   return {
@@ -316,6 +374,7 @@ function calculateFinancials(data) {
     unitFulfillmentCost,
     batchPreDeliveryFulfillmentCost,
     batchFulfillmentCost,
+    fixedLaunchInvestmentFromCategories,
     unitAllocatedFixedLaunchInvestment,
     unitFirstLaunchFullCost,
     firstLaunchProjectFullCost,

@@ -43,7 +43,7 @@ The matching `00_Office/projects/<project>/finance_model.json` record is the sou
 }
 ```
 
-When `canonicalRecord` is present, `node tools/build-cost-vault.mjs` verifies the batch quantity, sales-channel deduction rate, target first-launch project profit margin, fixed launch investment, category ids, category cost scopes, category unit amounts, canonical benchmark results, and recommended public unit price before writing the encrypted vault. A mismatch stops the build.
+When `canonicalRecord` is present, `node tools/build-cost-vault.mjs` verifies the batch quantity, sales-channel deduction rate, target first-launch project profit margin, recurring-cost category ids and amounts, structured fixed-launch component groups and items, canonical benchmark results, and recommended public unit price before writing the encrypted vault. A mismatch stops the build.
 
 Private product data uses `targetFirstLaunchProjectProfitMargin` as the canonical percentage field. Older `targetNetMargin` and `targetMargin` values are accepted only while importing legacy data; new session data, JSON exports, cloud records, and vault builds write only the canonical field.
 
@@ -51,8 +51,13 @@ Every cost category uses one of these scope codes:
 
 - `pre-delivery-cash`: unit pre-delivery fulfillment cost (`单位交付前履约成本`)
 - `post-sale-support-reserve`: expected unit after-sales support cost (`单位售后支持预计成本`)
+- `fixed-launch-investment`: batch-level release, validation, compliance, IP, and proof costs (`首发固定投入`)
 
-Their sum is unit fulfillment cost (`单位履约成本`). Fixed launch investment is then allocated across the planned batch; unit fulfillment cost plus that allocation is unit first-launch full cost (`单位首发完全成本`). Legacy private products without `canonicalRecord` remain compatible: missing finance fields receive the existing UI defaults, and categories without a scope are treated as `pre-delivery-cash` during the build. Canonically synchronized products must declare every category scope explicitly.
+The first two scopes sum to unit fulfillment cost (`单位履约成本`). Fixed-launch groups are batch amounts and are divided by the planned batch only when calculating the unit allocation; they never enter unit fulfillment cost. Unit fulfillment cost plus that allocation is unit first-launch full cost (`单位首发完全成本`). Legacy private products without `canonicalRecord` remain compatible: missing finance fields receive the existing UI defaults, and categories without a scope are treated as `pre-delivery-cash` during the build. Canonically synchronized products must declare every category scope explicitly.
+
+## Local Unlock Preference
+
+The `记住本机` option stores only the last successful public product id and access code in that browser's local storage. It is never included in cloud-sync documents. `清除解锁` removes both the decrypted session data and the saved local access code. Use the option only in a trusted browser profile because any person with access to that profile can open developer tools and read local storage.
 
 The standard first-launch calculation bridge is:
 
