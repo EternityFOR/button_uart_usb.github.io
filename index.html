@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>成本计算器</title>
+  <title>产品成本与首发项目利润规划器</title>
   <style>
     :root {
       --bg: #f5f7fa;
@@ -301,7 +301,7 @@
     }
 
     .category-header {
-      grid-template-columns: 28px 1fr auto auto auto;
+      grid-template-columns: 28px minmax(180px, 1fr) auto auto auto auto;
       padding: 10px 12px;
       background: #edf3fa;
       border-bottom: 1px solid var(--line);
@@ -632,7 +632,7 @@
 <body>
   <header class="topbar">
     <div class="title-row">
-      <h1>成本计算器</h1>
+      <h1>产品成本与首发项目利润规划器</h1>
       <div class="product-switcher">
         <label for="productSelect">当前产品</label>
         <select id="productSelect"></select>
@@ -690,15 +690,15 @@
           </select>
         </div>
         <div class="field">
-          <label for="targetNetMargin">目标净利率 %</label>
+          <label for="targetNetMargin">目标首发项目净利率 %</label>
           <input id="targetNetMargin" type="number" min="0" max="60" step="1">
         </div>
         <div class="field">
-          <label for="salesFeeRate">平台/支付费 %</label>
+          <label for="salesFeeRate">销售渠道扣减率 %</label>
           <input id="salesFeeRate" type="number" min="0" max="30" step="0.5">
         </div>
         <div class="field">
-          <label for="fixedLaunchCost">首发固定成本</label>
+          <label for="fixedLaunchCost">首发固定投入</label>
           <input id="fixedLaunchCost" type="number" min="0" step="1">
         </div>
         <div class="field">
@@ -783,6 +783,9 @@
     const DEFAULT_CLOUD_DOC_KEY = "product-cost";
     const DEFAULT_USER_NAME = "未填写";
     const VAULT_URL = "data/cost-vault.json";
+    const COST_SCOPE_PRE_DELIVERY_CASH = "pre-delivery-cash";
+    const COST_SCOPE_POST_SALE_SUPPORT = "post-sale-support-reserve";
+    const FINANCIAL_TERMINOLOGY_VERSION = "2026-07-17";
 
     const blankProductTemplate = {
       projectName: "未命名成本表",
@@ -841,8 +844,8 @@
       return Math.random().toString(36).slice(2, 10);
     }
 
-    function category(name, note, groups) {
-      return { id: uid(), name, note, collapsed: false, groups };
+    function category(name, note, groups, costScope = COST_SCOPE_PRE_DELIVERY_CASH) {
+      return { id: uid(), name, note, costScope, collapsed: false, groups };
     }
 
     function group(name, note, items) {
@@ -925,6 +928,13 @@
       next.targetNetMargin = value?.targetNetMargin ?? value?.targetMargin ?? 30;
       next.salesFeeRate = value?.salesFeeRate ?? 0;
       next.fixedLaunchCost = value?.fixedLaunchCost ?? 0;
+      delete next.financialSummary;
+      next.categories.forEach((cat) => {
+        cat.groups ||= [];
+        cat.costScope = normalizeCostScope(
+          cat.costScope || (cat.id === "support-reserve" ? COST_SCOPE_POST_SALE_SUPPORT : COST_SCOPE_PRE_DELIVERY_CASH)
+        );
+      });
       walkItems(next, (it) => {
         it.suppliers ||= [];
         it.chosenSupplierId ||= it.suppliers[0]?.id || "";
@@ -1253,13 +1263,21 @@
       }
       const totals = calculateTotals();
       el.summary.innerHTML = [
-        stat("单台经济成本", money(totals.unitTotal), `${totals.itemCount} 个成本项目`),
-        stat("产品批次成本", money(totals.batchTotal), `${data.batchQty || 1} 台`),
-        stat("首发固定成本", money(totals.fixedLaunchCost), "认证、签名、工程验证等"),
-        stat("首发总经济成本", money(totals.fullLaunchCost), "产品批次 + 固定投入"),
-        stat("建议公开售价/台", money(totals.suggestedPrice), `最低 ${money(totals.minimumPrice)}`),
-        stat("预计净利/台", money(totals.unitProfit), `${formatNum(totals.realizedNetMargin)}% 实际净利率`),
-        stat("平台/支付扣减", money(totals.salesFeeTotal), `${formatNum(data.salesFeeRate ?? 0)}% / 批次`),
+        stat("单位生产交付前现金成本", money(totals.unitPreDeliveryCashCost), "生产、质检、包装和出货前返工"),
+        stat("单位售后支持预留", money(totals.unitPostSaleSupportReserve), "换新、补寄和支持者服务"),
+        stat("单位产品经济成本", money(totals.unitProductEconomicCost), `${totals.itemCount} 个成本项目`),
+        stat("批次制造现金需求", money(totals.batchManufacturingCashRequirement), `${totals.batchQuantity} 台生产交付前`),
+        stat("批次产品经济成本", money(totals.batchProductEconomicCost), "制造现金 + 批次售后预留"),
+        stat("首发固定投入", money(totals.fixedLaunchInvestment), "认证、签名、工程验证等"),
+        stat("首批完整经济成本", money(totals.fullFirstLaunchEconomicCost), "批次产品经济成本 + 固定投入"),
+        stat("最低平均售价/台", money(totals.minimumAverageSellingPrice), `${formatNum(totals.targetFirstLaunchProjectNetMarginRate * 100)}% 目标首发项目净利率`),
+        stat("建议公开单价/台", money(totals.recommendedRetailUnitPrice), "按公开价格尾数向上取整"),
+        stat("众筹产品总收入", money(totals.grossPledgeRevenue), `${money(totals.recommendedRetailUnitPrice)} × ${totals.batchQuantity}`),
+        stat("销售渠道扣减", money(totals.salesChannelDeductions), `${formatNum(totals.salesChannelDeductionRate * 100)}% / 批次`),
+        stat("销售净收入", money(totals.netSalesRevenue), "众筹产品总收入 - 销售渠道扣减"),
+        stat("产品贡献利润", money(totals.productContributionProfit), "销售净收入 - 批次产品经济成本"),
+        stat("首发项目净利润", money(totals.firstLaunchProjectNetProfit), "产品贡献利润 - 首发固定投入"),
+        stat("首发项目净利率", percent(totals.firstLaunchProjectNetMargin), "首发项目净利润 / 众筹产品总收入"),
         stat("未选供应商", String(totals.missingSupplier), "需要补供应商")
       ].join("");
     }
@@ -1300,6 +1318,7 @@
           <button class="category-header" data-toggle-category="${cat.id}">
             <span class="twisty"></span>
             <span class="heading-main"><strong>${escapeHtml(cat.name)}</strong><small>${escapeHtml(cat.note || "")}</small></span>
+            <span class="pill">${escapeHtml(costScopeLabel(cat.costScope))}</span>
             <span class="pill">${cat.groups.length}组 / ${itemCount(cat)}项</span>
             <span class="money">${money(categoryTotal(cat))}</span>
             <span class="category-tools">
@@ -1346,7 +1365,7 @@
             ${headerCell(percent(it.lossRate), "损耗")}
             ${headerCell(chosen?.name || "未选", "供应商")}
             ${headerCell(chosen?.sku || "-", "料号")}
-            ${headerCell(money(itemUnitCost(it)), "单台成本")}
+            ${headerCell(money(itemUnitCost(it)), "单位成本计入额")}
             <span class="item-tools"><button data-action="edit-item" data-category-id="${cat.id}" data-group-id="${grp.id}" data-item-id="${it.id}">编辑</button></span>
           </button>
           <div class="item-body">
@@ -1482,7 +1501,7 @@
       if (!store.products.length) return;
       const name = prompt("大类名称", "新大类");
       if (!name) return;
-      data.categories.push(category(name, "", []));
+      data.categories.push(category(name, "", [], COST_SCOPE_PRE_DELIVERY_CASH));
       save();
       render();
     }
@@ -1491,8 +1510,22 @@
       const cat = findCategory(catId);
       const name = prompt("大类名称", cat.name);
       if (!name) return;
+      const note = prompt("大类备注", cat.note || "");
+      const scope = prompt(
+        "成本范围代码：pre-delivery-cash 或 post-sale-support-reserve",
+        normalizeCostScope(cat.costScope)
+      );
+      let normalizedScope = normalizeCostScope(cat.costScope);
+      if (scope !== null) {
+        normalizedScope = normalizeCostScope(scope, "");
+        if (!normalizedScope) {
+          alert("成本范围只能是 pre-delivery-cash 或 post-sale-support-reserve。");
+          return;
+        }
+      }
       cat.name = name;
-      cat.note = prompt("大类备注", cat.note || "") ?? cat.note;
+      cat.note = note ?? cat.note;
+      cat.costScope = normalizedScope;
       save();
       render();
     }
@@ -1593,7 +1626,13 @@
         return;
       }
       el.modalTitle.textContent = "导出JSON";
-      el.jsonText.value = JSON.stringify(store, null, 2);
+      const exportStore = clone(store);
+      exportStore.financialTerminologyVersion = FINANCIAL_TERMINOLOGY_VERSION;
+      exportStore.products = store.products.map((product) => ({
+        ...clone(product),
+        financialSummary: buildFinancialSummary(calculateTotals(product), product)
+      }));
+      el.jsonText.value = JSON.stringify(exportStore, null, 2);
       el.applyJsonBtn.style.display = "none";
       el.copyJsonBtn.style.display = "";
       el.jsonModal.classList.add("open");
@@ -1851,21 +1890,27 @@
       const rows = [
         ["产品数量", store.products.length],
         ["项目", data.projectName || ""],
-        ["生产数量", data.batchQty || 1],
-        ["目标净利率%", data.targetNetMargin ?? 0],
-        ["平台及支付扣费率%", data.salesFeeRate ?? 0],
-        ["首发固定成本", totals.fixedLaunchCost],
-        ["单台经济成本", totals.unitTotal],
-        ["产品批次成本", totals.batchTotal],
-        ["首发总经济成本", totals.fullLaunchCost],
-        ["达到目标净利的最低售价/台", totals.minimumPrice],
-        ["建议公开售价/台", totals.suggestedPrice],
-        ["预计净利/台", totals.unitProfit],
-        ["批次平台及支付扣减", totals.salesFeeTotal],
-        ["批次预计净利", totals.batchProfit],
-        ["建议售价实际净利率%", totals.realizedNetMargin],
+        ["币种", data.currency || ""],
+        ["生产数量", totals.batchQuantity],
+        ["目标首发项目净利率%", totals.targetFirstLaunchProjectNetMarginRate * 100],
+        ["销售渠道扣减率%", totals.salesChannelDeductionRate * 100],
+        ["单位生产交付前现金成本", totals.unitPreDeliveryCashCost],
+        ["单位售后支持预留", totals.unitPostSaleSupportReserve],
+        ["单位产品经济成本", totals.unitProductEconomicCost],
+        ["批次制造现金需求", totals.batchManufacturingCashRequirement],
+        ["批次产品经济成本", totals.batchProductEconomicCost],
+        ["首发固定投入", totals.fixedLaunchInvestment],
+        ["首批完整经济成本", totals.fullFirstLaunchEconomicCost],
+        ["最低平均售价/台", totals.minimumAverageSellingPrice],
+        ["建议公开单价/台", totals.recommendedRetailUnitPrice],
+        ["众筹产品总收入", totals.grossPledgeRevenue],
+        ["销售渠道扣减", totals.salesChannelDeductions],
+        ["销售净收入", totals.netSalesRevenue],
+        ["产品贡献利润", totals.productContributionProfit],
+        ["首发项目净利润", totals.firstLaunchProjectNetProfit],
+        ["首发项目净利率%", totals.firstLaunchProjectNetMargin],
         [],
-        ["大类", "子类", "物料", "位号", "规格", "单台用量", "单位", "损耗率%", "选中供应商", "料号/SKU", "型号", "计价方式", "单价/批次价", "运费/台", "加工费/台", "单台成本", "批次成本", "备注"]
+        ["成本范围代码", "成本范围", "大类", "子类", "物料", "位号", "规格", "单台用量", "单位", "损耗率%", "选中供应商", "料号/SKU", "型号", "计价方式", "单价/批次价", "运费/台", "加工费/台", "单位成本计入额", "批次成本计入额", "备注"]
       ];
       data.categories.forEach((cat) => {
         cat.groups.forEach((grp) => {
@@ -1873,6 +1918,8 @@
             const sp = getChosenSupplier(it) || {};
             const unit = itemUnitCost(it);
             rows.push([
+              normalizeCostScope(cat.costScope),
+              costScopeLabel(cat.costScope),
               cat.name,
               grp.name,
               it.name,
@@ -1913,26 +1960,40 @@
       URL.revokeObjectURL(url);
     }
 
-    function calculateTotals() {
+    function calculateTotals(sourceData = data) {
       const totals = {
-        unitTotal: 0,
-        batchTotal: 0,
-        fixedLaunchCost: 0,
-        fullLaunchCost: 0,
-        minimumPrice: 0,
-        suggestedPrice: 0,
-        unitProfit: 0,
-        batchProfit: 0,
-        salesFeeTotal: 0,
-        realizedNetMargin: 0,
+        batchQuantity: Math.max(1, number(sourceData.batchQty || 1)),
+        unitPreDeliveryCashCost: 0,
+        unitPostSaleSupportReserve: 0,
+        unitProductEconomicCost: 0,
+        batchManufacturingCashRequirement: 0,
+        batchProductEconomicCost: 0,
+        fixedLaunchInvestment: 0,
+        fullFirstLaunchEconomicCost: 0,
+        minimumAverageSellingPrice: 0,
+        recommendedRetailUnitPrice: 0,
+        targetFirstLaunchProjectNetMarginRate: 0,
+        salesChannelDeductionRate: 0,
+        grossPledgeRevenue: 0,
+        salesChannelDeductions: 0,
+        netSalesRevenue: 0,
+        productContributionProfit: 0,
+        firstLaunchProjectNetProfit: 0,
+        allocatedFirstLaunchProjectNetProfitPerUnit: 0,
+        firstLaunchProjectNetMargin: 0,
         itemCount: 0,
         missingSupplier: 0,
         byName: {},
         byId: {}
       };
-      data.categories.forEach((cat) => {
-        const total = categoryTotal(cat);
-        totals.unitTotal += total;
+      sourceData.categories.forEach((cat) => {
+        const total = categoryTotal(cat, sourceData);
+        const scope = normalizeCostScope(cat.costScope);
+        if (scope === COST_SCOPE_POST_SALE_SUPPORT) {
+          totals.unitPostSaleSupportReserve += total;
+        } else {
+          totals.unitPreDeliveryCashCost += total;
+        }
         totals.byName[cat.name] = total;
         totals.byId[cat.id] = total;
         cat.groups.forEach((grp) => grp.items.forEach((it) => {
@@ -1940,23 +2001,66 @@
           if (!getChosenSupplier(it)) totals.missingSupplier += 1;
         }));
       });
-      const batchQty = Math.max(1, number(data.batchQty || 1));
-      totals.batchTotal = totals.unitTotal * batchQty;
-      totals.fixedLaunchCost = Math.max(0, number(data.fixedLaunchCost));
-      totals.fullLaunchCost = totals.batchTotal + totals.fixedLaunchCost;
-      const targetNetMargin = Math.min(60, Math.max(0, number(data.targetNetMargin))) / 100;
-      const salesFeeRate = Math.min(30, Math.max(0, number(data.salesFeeRate))) / 100;
-      const retainedRevenueRate = 1 - targetNetMargin - salesFeeRate;
-      totals.minimumPrice = retainedRevenueRate > 0
-        ? totals.fullLaunchCost / retainedRevenueRate / batchQty
+      totals.unitProductEconomicCost = totals.unitPreDeliveryCashCost + totals.unitPostSaleSupportReserve;
+      totals.batchManufacturingCashRequirement = totals.unitPreDeliveryCashCost * totals.batchQuantity;
+      totals.batchProductEconomicCost = totals.unitProductEconomicCost * totals.batchQuantity;
+      totals.fixedLaunchInvestment = Math.max(0, number(sourceData.fixedLaunchCost));
+      totals.fullFirstLaunchEconomicCost = totals.batchProductEconomicCost + totals.fixedLaunchInvestment;
+      totals.targetFirstLaunchProjectNetMarginRate = Math.min(60, Math.max(0, number(sourceData.targetNetMargin))) / 100;
+      totals.salesChannelDeductionRate = Math.min(30, Math.max(0, number(sourceData.salesFeeRate))) / 100;
+      const costCoverageRate = 1 - totals.targetFirstLaunchProjectNetMarginRate - totals.salesChannelDeductionRate;
+      totals.minimumAverageSellingPrice = costCoverageRate > 0
+        ? totals.fullFirstLaunchEconomicCost / costCoverageRate / totals.batchQuantity
         : 0;
-      totals.suggestedPrice = roundRetailPrice(totals.minimumPrice);
-      const grossRevenue = totals.suggestedPrice * batchQty;
-      totals.salesFeeTotal = grossRevenue * salesFeeRate;
-      totals.batchProfit = grossRevenue - totals.salesFeeTotal - totals.fullLaunchCost;
-      totals.unitProfit = totals.batchProfit / batchQty;
-      totals.realizedNetMargin = grossRevenue > 0 ? totals.batchProfit / grossRevenue * 100 : 0;
+      totals.recommendedRetailUnitPrice = roundRetailPrice(totals.minimumAverageSellingPrice);
+      totals.grossPledgeRevenue = totals.recommendedRetailUnitPrice * totals.batchQuantity;
+      totals.salesChannelDeductions = totals.grossPledgeRevenue * totals.salesChannelDeductionRate;
+      totals.netSalesRevenue = totals.grossPledgeRevenue - totals.salesChannelDeductions;
+      totals.productContributionProfit = totals.netSalesRevenue - totals.batchProductEconomicCost;
+      totals.firstLaunchProjectNetProfit = totals.productContributionProfit - totals.fixedLaunchInvestment;
+      totals.allocatedFirstLaunchProjectNetProfitPerUnit = totals.firstLaunchProjectNetProfit / totals.batchQuantity;
+      totals.firstLaunchProjectNetMargin = totals.grossPledgeRevenue > 0
+        ? totals.firstLaunchProjectNetProfit / totals.grossPledgeRevenue * 100
+        : 0;
+
+      // Backward-compatible aliases for saved sessions and integrations that still use the v2 names.
+      totals.unitTotal = totals.unitProductEconomicCost;
+      totals.batchTotal = totals.batchProductEconomicCost;
+      totals.fixedLaunchCost = totals.fixedLaunchInvestment;
+      totals.fullLaunchCost = totals.fullFirstLaunchEconomicCost;
+      totals.minimumPrice = totals.minimumAverageSellingPrice;
+      totals.suggestedPrice = totals.recommendedRetailUnitPrice;
+      totals.salesFeeTotal = totals.salesChannelDeductions;
+      totals.batchProfit = totals.firstLaunchProjectNetProfit;
+      totals.unitProfit = totals.allocatedFirstLaunchProjectNetProfitPerUnit;
+      totals.realizedNetMargin = totals.firstLaunchProjectNetMargin;
       return totals;
+    }
+
+    function buildFinancialSummary(totals, sourceData = data) {
+      return {
+        schemaVersion: 1,
+        terminologyVersion: FINANCIAL_TERMINOLOGY_VERSION,
+        currency: sourceData.currency || "",
+        batchQuantity: totals.batchQuantity,
+        targetFirstLaunchProjectNetMarginRate: totals.targetFirstLaunchProjectNetMarginRate,
+        salesChannelDeductionRate: totals.salesChannelDeductionRate,
+        unitPreDeliveryCashCost: totals.unitPreDeliveryCashCost,
+        unitPostSaleSupportReserve: totals.unitPostSaleSupportReserve,
+        unitProductEconomicCost: totals.unitProductEconomicCost,
+        batchManufacturingCashRequirement: totals.batchManufacturingCashRequirement,
+        batchProductEconomicCost: totals.batchProductEconomicCost,
+        fixedLaunchInvestment: totals.fixedLaunchInvestment,
+        fullFirstLaunchEconomicCost: totals.fullFirstLaunchEconomicCost,
+        minimumAverageSellingPrice: totals.minimumAverageSellingPrice,
+        recommendedRetailUnitPrice: totals.recommendedRetailUnitPrice,
+        grossPledgeRevenue: totals.grossPledgeRevenue,
+        salesChannelDeductions: totals.salesChannelDeductions,
+        netSalesRevenue: totals.netSalesRevenue,
+        productContributionProfit: totals.productContributionProfit,
+        firstLaunchProjectNetProfit: totals.firstLaunchProjectNetProfit,
+        firstLaunchProjectNetMarginRate: totals.firstLaunchProjectNetMargin / 100
+      };
     }
 
     function roundRetailPrice(value) {
@@ -1964,22 +2068,22 @@
       return Math.ceil((value + 1) / 10) * 10 - 1;
     }
 
-    function categoryTotal(cat) {
-      return cat.groups.reduce((sum, grp) => sum + groupTotal(grp), 0);
+    function categoryTotal(cat, sourceData = data) {
+      return cat.groups.reduce((sum, grp) => sum + groupTotal(grp, sourceData), 0);
     }
 
-    function groupTotal(grp) {
-      return grp.items.reduce((sum, it) => sum + itemUnitCost(it), 0);
+    function groupTotal(grp, sourceData = data) {
+      return grp.items.reduce((sum, it) => sum + itemUnitCost(it, sourceData), 0);
     }
 
-    function itemUnitCost(it) {
+    function itemUnitCost(it, sourceData = data) {
       const sp = getChosenSupplier(it);
-      return (sp ? supplierUnitCost(it, sp) : 0) + number(it.processCost);
+      return (sp ? supplierUnitCost(it, sp, sourceData) : 0) + number(it.processCost);
     }
 
-    function supplierUnitCost(it, sp) {
+    function supplierUnitCost(it, sp, sourceData = data) {
       if (sp.pricingMode === "batch") {
-        return number(sp.price) / Math.max(1, number(data.batchQty || 1)) + number(sp.shipping);
+        return number(sp.price) / Math.max(1, number(sourceData.batchQty || 1)) + number(sp.shipping);
       }
       const qty = number(it.qty);
       const loss = 1 + number(it.lossRate) / 100;
@@ -2003,7 +2107,8 @@
     }
 
     function matchesCategory(cat) {
-      return [cat.name, cat.note].some((value) => String(value || "").toLowerCase().includes(filterText));
+      return [cat.name, cat.note, cat.costScope, costScopeLabel(cat.costScope)]
+        .some((value) => String(value || "").toLowerCase().includes(filterText));
     }
 
     function matchesGroup(grp) {
@@ -2034,6 +2139,17 @@
     function number(value) {
       const n = Number(value);
       return Number.isFinite(n) ? n : 0;
+    }
+
+    function normalizeCostScope(value, fallback = COST_SCOPE_PRE_DELIVERY_CASH) {
+      if (value === COST_SCOPE_PRE_DELIVERY_CASH || value === COST_SCOPE_POST_SALE_SUPPORT) return value;
+      return fallback;
+    }
+
+    function costScopeLabel(value) {
+      return normalizeCostScope(value) === COST_SCOPE_POST_SALE_SUPPORT
+        ? "售后支持预留"
+        : "生产交付前现金";
     }
 
     function formatNum(value) {

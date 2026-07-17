@@ -30,6 +30,42 @@ node tools/build-cost-vault.mjs
 5. Commit the generated `data/cost-vault.json`, page files, and tool scripts.
 6. Access codes are recorded at `.private/access-codes.txt`.
 
+## Finance Synchronization
+
+The matching `00_Office/projects/<project>/finance_model.json` record is the source of truth for management-accounting terminology and benchmark values. A private product source may opt into strict synchronization with a record whose path is relative to that private product file:
+
+```json
+{
+  "canonicalRecord": {
+    "path": "../../../../00_Office/projects/<project>/finance_model.json",
+    "tolerance": 0.0001
+  }
+}
+```
+
+When `canonicalRecord` is present, `node tools/build-cost-vault.mjs` verifies the batch quantity, sales-channel deduction rate, target first-launch project net margin, fixed launch investment, category ids, category cost scopes, category unit amounts, and recommended public unit price before writing the encrypted vault. A mismatch stops the build. Do not copy benchmark values into a second manually maintained summary.
+
+Every cost category uses one of these scope codes:
+
+- `pre-delivery-cash`: unit manufacturing and pre-delivery cash cost (`单位生产交付前现金成本`)
+- `post-sale-support-reserve`: unit post-sale support reserve (`单位售后支持预留`)
+
+Their sum is unit product economic cost (`单位产品经济成本`). Legacy private products without `canonicalRecord` remain compatible: missing finance fields receive the existing UI defaults, and categories without a scope are treated as `pre-delivery-cash` during the build. Canonically synchronized products must declare every category scope explicitly.
+
+The standard first-launch calculation bridge is:
+
+```text
+gross pledge revenue
+- sales-channel deductions
+= net sales revenue
+- batch product economic cost
+= product contribution profit
+- fixed launch investment
+= first-launch project net profit
+```
+
+First-launch project net margin is first-launch project net profit divided by gross pledge revenue. It is a planning measure, not statutory company net profit. JSON and CSV exports include the same calculated bridge and terminology version; calculated JSON summaries are regenerated on export and are not imported as source data.
+
 Local preview:
 
 ```bash
