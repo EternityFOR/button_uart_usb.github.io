@@ -3022,7 +3022,10 @@
       totals.minimumAverageSellingPrice = totals.retainedCostCoverageRate > 0
         ? totals.unitFirstLaunchFullCost / totals.retainedCostCoverageRate
         : 0;
-      totals.recommendedRetailUnitPrice = roundRetailPrice(totals.minimumAverageSellingPrice);
+      totals.recommendedRetailUnitPrice = Math.max(
+        roundRetailPrice(totals.minimumAverageSellingPrice),
+        Number(data.recommendedPublicUnitPrice || 0)
+      );
       totals.grossPledgeRevenue = totals.recommendedRetailUnitPrice * totals.batchQuantity;
       totals.salesChannelDeductions = totals.grossPledgeRevenue * totals.salesChannelDeductionRate;
       totals.netSalesRevenue = totals.grossPledgeRevenue - totals.salesChannelDeductions;
@@ -3190,7 +3193,7 @@
         "BUD-0015": "主 .com 域名注册与首次续费基线",
         "BUD-0017": "验证样机与寄送（已由 V5 工程批次覆盖）",
         "BUD-0018": "台架测试夹具、适配器、备用目标板与耗材",
-        "BUD-0019": "首批 300 台交付前生产现金需求（已进入当前模型）",
+        "BUD-0019": "首批 1,000 台交付前生产现金需求（已进入当前模型）",
         "BUD-0020": "三人核心团队月度薪酬基线",
         "BUD-0021": "香港本地私人公司注册费",
         "BUD-0022": "首份商业登记证费用及征费",

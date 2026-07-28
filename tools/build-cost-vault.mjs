@@ -511,6 +511,9 @@ function validateProductData(data, sourceFile) {
   );
   assertPercentageAtMost(data.salesFeeRate, 30, sourceFile, "data.salesFeeRate");
   assertNonNegativeNumber(data.fixedLaunchCost, sourceFile, "data.fixedLaunchCost");
+  if (data.recommendedPublicUnitPrice != null) {
+    assertNonNegativeNumber(data.recommendedPublicUnitPrice, sourceFile, "data.recommendedPublicUnitPrice");
+  }
   if (Number(data.targetFirstLaunchProjectProfitMargin) + Number(data.salesFeeRate) >= 100) {
     fail(sourceFile, "data.targetFirstLaunchProjectProfitMargin + data.salesFeeRate must be below 100%.");
   }
@@ -765,7 +768,10 @@ function calculateFinancials(data) {
     unitFirstLaunchFullCost,
     firstLaunchProjectFullCost,
     minimumAverageSellingPrice,
-    recommendedRetailUnitPrice: roundRetailPrice(minimumAverageSellingPrice)
+    recommendedRetailUnitPrice: Math.max(
+      roundRetailPrice(minimumAverageSellingPrice),
+      Number(data.recommendedPublicUnitPrice || 0)
+    )
   };
 }
 
