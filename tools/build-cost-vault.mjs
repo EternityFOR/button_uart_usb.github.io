@@ -136,6 +136,7 @@ function normalizeProductData(data, sourceFile, requireExplicitCostScope) {
   delete data.targetMargin;
   data.salesFeeRate = data.salesFeeRate ?? 0;
   data.fixedLaunchCost = data.fixedLaunchCost ?? 0;
+  data.plannedAverageSellingPrice = data.plannedAverageSellingPrice ?? 0;
   if (!Array.isArray(data.categories)) return;
 
   for (const category of data.categories) {
@@ -514,6 +515,9 @@ function validateProductData(data, sourceFile) {
   if (data.recommendedPublicUnitPrice != null) {
     assertNonNegativeNumber(data.recommendedPublicUnitPrice, sourceFile, "data.recommendedPublicUnitPrice");
   }
+  if (data.plannedAverageSellingPrice != null) {
+    assertNonNegativeNumber(data.plannedAverageSellingPrice, sourceFile, "data.plannedAverageSellingPrice");
+  }
   if (Number(data.targetFirstLaunchProjectProfitMargin) + Number(data.salesFeeRate) >= 100) {
     fail(sourceFile, "data.targetFirstLaunchProjectProfitMargin + data.salesFeeRate must be below 100%.");
   }
@@ -699,6 +703,24 @@ async function validateCanonicalRecord(record, data, sourceFile) {
     sourceFile,
     "recommended public unit price"
   );
+
+  if (Array.isArray(canonical.campaignPricing?.tiers) && canonical.campaignPricing.tiers.length) {
+    const campaignTotals = canonical.campaignPricing.tiers.reduce(
+      (totals, tier) => ({
+        units: totals.units + Number(tier.rewardLimit) * Number(tier.hardwareUnitsPerReward),
+        revenue: totals.revenue + Number(tier.rewardLimit) * Number(tier.campaignPrice)
+      }),
+      { units: 0, revenue: 0 }
+    );
+    if (campaignTotals.units <= 0) fail(canonicalPath, "campaignPricing.tiers must produce a positive hardware-unit total.");
+    assertClose(
+      data.plannedAverageSellingPrice,
+      campaignTotals.revenue / campaignTotals.units,
+      tolerance,
+      sourceFile,
+      "planned average selling price"
+    );
+  }
 
   if (canonical.benchmarkResults != null) {
     assertObject(canonical.benchmarkResults, canonicalPath, "benchmarkResults");

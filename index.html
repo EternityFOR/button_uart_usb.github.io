@@ -253,7 +253,7 @@
 
     .cost-overview {
       display: grid;
-      grid-template-columns: repeat(4, minmax(230px, 1fr));
+      grid-template-columns: repeat(5, minmax(180px, 1fr));
       min-width: 0;
       overflow: hidden;
       border: 1px solid var(--line);
@@ -290,6 +290,14 @@
 
     .overview-metric.price-formula .overview-value {
       color: var(--good);
+    }
+
+    .overview-metric.profit {
+      background: var(--accent-soft);
+    }
+
+    .overview-metric.profit .overview-value {
+      color: var(--accent);
     }
 
     .overview-label {
@@ -1474,6 +1482,10 @@
           <label for="fixedLaunchCost" id="fixedLaunchCostLabel">首发固定投入</label>
           <input id="fixedLaunchCost" type="number" min="0" step="1">
         </div>
+        <div class="field">
+          <label for="plannedAverageSellingPrice" title="多档售价时使用按销量加权的平均成交单价；留空或填 0 时使用建议公开单价">计划平均成交单价</label>
+          <input id="plannedAverageSellingPrice" type="number" min="0" step="0.01">
+        </div>
       </div>
     </section>
 
@@ -1580,7 +1592,7 @@
     const COST_SCOPE_FIXED_LAUNCH = "fixed-launch-investment";
     const COST_SCOPE_CHANNEL_DEDUCTION = "sales-channel-deduction";
     const COST_SCOPE_BUDGET_CONTEXT = "budget-context";
-    const FINANCIAL_TERMINOLOGY_VERSION = "2026-07-18-budget-context";
+    const FINANCIAL_TERMINOLOGY_VERSION = "2026-07-28-planned-revenue";
 
     const blankProductTemplate = {
       projectName: "未命名成本表",
@@ -1589,6 +1601,7 @@
       targetFirstLaunchProjectProfitMargin: 30,
       salesFeeRate: 0,
       fixedLaunchCost: 0,
+      plannedAverageSellingPrice: 0,
       note: "",
       categories: []
     };
@@ -1613,6 +1626,7 @@
       salesFeeRate: document.getElementById("salesFeeRate"),
       fixedLaunchCost: document.getElementById("fixedLaunchCost"),
       fixedLaunchCostLabel: document.getElementById("fixedLaunchCostLabel"),
+      plannedAverageSellingPrice: document.getElementById("plannedAverageSellingPrice"),
       globalNote: document.getElementById("globalNote"),
       summary: document.getElementById("summary"),
       categoryNav: document.getElementById("categoryNav"),
@@ -1735,6 +1749,7 @@
       delete next.targetMargin;
       next.salesFeeRate = value?.salesFeeRate ?? 0;
       next.fixedLaunchCost = value?.fixedLaunchCost ?? 0;
+      next.plannedAverageSellingPrice = value?.plannedAverageSellingPrice ?? 0;
       delete next.financialSummary;
       next.categories.forEach((cat) => {
         cat.groups ||= [];
@@ -1866,6 +1881,7 @@
       bindRootField(el.targetProjectProfitMargin, "targetFirstLaunchProjectProfitMargin", () => number(el.targetProjectProfitMargin.value));
       bindRootField(el.salesFeeRate, "salesFeeRate", () => number(el.salesFeeRate.value), true);
       bindRootField(el.fixedLaunchCost, "fixedLaunchCost", () => number(el.fixedLaunchCost.value));
+      bindRootField(el.plannedAverageSellingPrice, "plannedAverageSellingPrice", () => number(el.plannedAverageSellingPrice.value), true);
       el.globalNote.addEventListener("input", () => updateRoot("note", el.globalNote.value, false, false));
       el.globalNote.addEventListener("blur", () => updateRoot("note", el.globalNote.value, true, false));
       el.filterText.addEventListener("input", () => {
@@ -2079,6 +2095,7 @@
       el.targetProjectProfitMargin.value = data.targetFirstLaunchProjectProfitMargin ?? 30;
       el.salesFeeRate.value = data.salesFeeRate ?? 0;
       el.fixedLaunchCost.value = data.fixedLaunchCost ?? 0;
+      el.plannedAverageSellingPrice.value = data.plannedAverageSellingPrice ?? 0;
       el.globalNote.value = data.note || "";
       const hasProducts = Boolean(store.products.length);
       const fixedLaunchDetailed = hasFixedLaunchDetails(data);
@@ -2089,6 +2106,7 @@
         el.targetProjectProfitMargin,
         el.salesFeeRate,
         el.fixedLaunchCost,
+        el.plannedAverageSellingPrice,
         el.globalNote,
         el.filterText,
         document.getElementById("addCategoryBtn"),
@@ -2171,6 +2189,11 @@
             <span class="overview-label">最低平均售价</span>
             <strong class="overview-value">${escapeHtml(money(totals.minimumAverageSellingPrice))}</strong>
             <span class="overview-detail">${escapeHtml(formatFixed(totals.unitFirstLaunchFullCost))} ÷ (1 - ${escapeHtml(formatFixed(totals.salesChannelDeductionRate * 100, 2))}% - ${escapeHtml(formatFixed(totals.targetFirstLaunchProjectProfitMarginRate * 100, 2))}%) = ${escapeHtml(formatFixed(totals.minimumAverageSellingPrice))}</span>
+          </div>
+          <div class="overview-metric profit" title="预计首发项目利润（管理口径）= 产品收入 - 销售渠道扣减 - 批次履约成本 - 首发固定投入；不等于公司法定净利润或纯利">
+            <span class="overview-label">预计首发项目利润 · ${escapeHtml(formatFixed(totals.firstLaunchProjectProfitMargin, 2))}%</span>
+            <strong class="overview-value">${escapeHtml(money(totals.firstLaunchProjectProfit))}</strong>
+            <span class="overview-detail">${escapeHtml(formatFixed(totals.grossPledgeRevenue, 2))} - ${escapeHtml(formatFixed(totals.salesChannelDeductions, 2))} - ${escapeHtml(formatFixed(totals.batchFulfillmentCost, 2))} - ${escapeHtml(formatFixed(totals.fixedLaunchInvestment, 2))}</span>
           </div>
         </div>
       `;
@@ -2888,6 +2911,7 @@
         ["首发项目完全成本", totals.firstLaunchProjectFullCost],
         ["最低平均售价/台", totals.minimumAverageSellingPrice],
         ["建议公开单价/台", totals.recommendedRetailUnitPrice],
+        ["计划平均成交单价/台", totals.plannedAverageSellingPrice],
         ["众筹产品总收入", totals.grossPledgeRevenue],
         ["管理口径产品毛利", totals.managementProductGrossProfit],
         ["销售渠道扣减", totals.salesChannelDeductions],
@@ -2968,6 +2992,7 @@
         firstLaunchProjectFullCost: 0,
         minimumAverageSellingPrice: 0,
         recommendedRetailUnitPrice: 0,
+        plannedAverageSellingPrice: 0,
         targetFirstLaunchProjectProfitMarginRate: 0,
         salesChannelDeductionRate: 0,
         retainedCostCoverageRate: 0,
@@ -3024,9 +3049,11 @@
         : 0;
       totals.recommendedRetailUnitPrice = Math.max(
         roundRetailPrice(totals.minimumAverageSellingPrice),
-        Number(data.recommendedPublicUnitPrice || 0)
+        Number(sourceData.recommendedPublicUnitPrice || 0)
       );
-      totals.grossPledgeRevenue = totals.recommendedRetailUnitPrice * totals.batchQuantity;
+      totals.plannedAverageSellingPrice = Math.max(0, number(sourceData.plannedAverageSellingPrice))
+        || totals.recommendedRetailUnitPrice;
+      totals.grossPledgeRevenue = totals.plannedAverageSellingPrice * totals.batchQuantity;
       totals.salesChannelDeductions = totals.grossPledgeRevenue * totals.salesChannelDeductionRate;
       totals.netSalesRevenue = totals.grossPledgeRevenue - totals.salesChannelDeductions;
       totals.managementProductGrossProfit = totals.grossPledgeRevenue - totals.batchFulfillmentCost;
@@ -3061,6 +3088,7 @@
         firstLaunchProjectFullCost: totals.firstLaunchProjectFullCost,
         minimumAverageSellingPrice: totals.minimumAverageSellingPrice,
         recommendedRetailUnitPrice: totals.recommendedRetailUnitPrice,
+        plannedAverageSellingPrice: totals.plannedAverageSellingPrice,
         grossPledgeRevenue: totals.grossPledgeRevenue,
         salesChannelDeductions: totals.salesChannelDeductions,
         netSalesRevenue: totals.netSalesRevenue,

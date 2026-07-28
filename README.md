@@ -55,7 +55,7 @@ Every cost category uses one of these scope codes:
 - `sales-channel-deduction`: percentage deductions from product revenue, such as platform and payment-processing fees (`销售渠道扣减`)
 - `budget-context`: covered, pass-through, deferred, conditional, paid, company-level, or unpriced statutory references that must remain visible without entering the current cost formula (`预算边界与备选路线`)
 
-The first two scopes sum to unit fulfillment cost (`单位履约成本`). Fixed-launch groups are batch amounts and are divided by the planned batch only when calculating the unit allocation; they never enter unit fulfillment cost. Unit fulfillment cost plus that allocation is unit first-launch full cost (`单位首发完全成本`). Sales-channel deductions enter the minimum-selling-price and project-profit equations as a percentage of product revenue. Budget-context rows are never silently added to the current model.
+The first two scopes sum to unit fulfillment cost (`单位履约成本`). Fixed-launch groups are batch amounts and are divided by the planned batch only when calculating the unit allocation; they never enter unit fulfillment cost. Unit fulfillment cost plus that allocation is unit first-launch full cost (`单位首发完全成本`). Sales-channel deductions enter the minimum-selling-price and project-profit equations as a percentage of product revenue. `plannedAverageSellingPrice` is the weighted average revenue per hardware unit for the active sales mix; when it is zero, the planner falls back to the recommended public unit price. Budget-context rows are never silently added to the current model.
 
 For products with `canonicalRecord`, the vault builder also reads `00_Office/registers/budget_items.csv`. It injects the active revenue deductions and every remaining product, release-signing, website, IP, company-setup, and company-operations budget row that is not already represented by a fixed-launch detail. Unit-model references, covered items, pass-through shipping, deferred or alternative routes, paid records, company-level costs, and the canonical model's still-unpriced tax/statutory boundaries therefore remain auditable without double counting. Legacy private products without `canonicalRecord` remain compatible: missing finance fields receive the existing UI defaults, and categories without a scope are treated as `pre-delivery-cash` during the build. Canonically synchronized products must declare every source category scope explicitly.
 
@@ -75,7 +75,7 @@ gross pledge revenue
 = first-launch project profit (management basis)
 ```
 
-First-launch project profit margin is first-launch project profit divided by gross pledge revenue. It is a management-planning measure, not statutory company net profit. JSON and CSV exports include the same calculated bridge and terminology version; calculated JSON summaries are regenerated on export and are not imported as source data.
+First-launch project profit margin is first-launch project profit divided by gross pledge revenue. The compact overview displays this total and its full subtraction formula. It is a management-planning measure, not statutory company net profit or pure profit. JSON and CSV exports include the same calculated bridge, planned average selling price, and terminology version; calculated JSON summaries are regenerated on export and are not imported as source data.
 
 Local preview:
 
